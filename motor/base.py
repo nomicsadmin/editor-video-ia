@@ -204,6 +204,8 @@ def proteger_bordas(i, S):
             S["a"] = round(v, 3)
     if S["b"] < dur - 0.05 and em_som_perto(bid, S["b"]):
         v = vale(bid, S["b"], +1)
+        if v is None and dur - S["b"] < 0.8:  # fala emendada até o fim do arquivo: vai até o fim, não come o final
+            v = dur
         if v is not None:
             AJUSTES.append(f"trecho {i + 1}: fim {S['b']:.2f} → {v:.2f} (fala colada; ficou «{texto_entre(bid, S['b'], v)}»)")
             S["b"] = round(v, 3)
@@ -286,7 +288,8 @@ for i, S in enumerate(EDL["trechos"]):
     fala = S.get("fala", True)
     todas = palavras(bid)
     # palavra na emenda entre trechos (o transcritor marca o início cedo): entra uma vez só, no trecho que tem o som dela
-    ws = [w for w in todas if w["s"] >= a - 0.15 and w["e"] <= b + 0.3 and w["s"] < b and (bid, w["s"]) not in EMITIDAS] if fala else []
+    sobre = lambda w: min(w["e"], b) - max(w["s"], a)
+    ws = [w for w in todas if (bid, w["s"]) not in EMITIDAS and sobre(w) >= min(0.1, (w["e"] - w["s"]) / 2)] if fala else []
     for w in todas:  # palavra que começa dentro do trecho mas termina depois da borda: some da fala sem aviso
         if fala and a <= w["s"] < b and w["e"] > b + 0.3:
             print(f"  ⚠️  trecho {i + 1}: «{w['w']}» ({w['s']:.2f}–{w['e']:.2f}) passa da borda b={b}; aumente o b ou corte antes dela", flush=True)
@@ -339,6 +342,8 @@ for i, S in enumerate(EDL["trechos"]):
         for sa, sb, pw in spans:
             if sb < (dur_bruto or 1e9) - 0.05 and em_som_perto(bid, sb):
                 v = vale(bid, sb, +1, alcance=1.2)
+                if v is None and dur_bruto and dur_bruto - sb < 0.8:
+                    v = dur_bruto
                 if v is not None:
                     AJUSTES.append(f"trecho {i + 1}: borda {sb:.2f} → {v:.2f} (fala colada; voltou «{texto_entre(bid, sb, v)}»)"); sb = v
             if sa > 0.05 and em_som_perto(bid, sa):
