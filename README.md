@@ -6,9 +6,6 @@
 Corte pela fala, legenda palavra a palavra, telas que entram na palavra certa e som pronto pro Instagram.<br>
 **Tudo no seu computador. Sem pagar por minuto. Sem saber editar.**
 
-<picture>
-  <img alt="O mesmo trecho antes e depois da edição" src="docs/img/antes-depois.gif" width="560">
-</picture>
 
 [**Começar com IA (sem saber editar)**](#-comece-em-3-passos-com-a-ia) · [**Passo a passo completo**](docs/README.md) · [**Ver as receitas**](#-as-receitas)
 
