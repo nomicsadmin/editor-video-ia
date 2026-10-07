@@ -26,8 +26,6 @@ def hhmmss(s, sep=","):
 
 
 def extrair_audio(caminho):
-    if caminho.lower().endswith(".wav"):
-        return caminho
     destino = os.path.join(tempfile.gettempdir(), os.path.basename(caminho) + ".16k.wav")
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", caminho, "-vn", "-ac", "1", "-ar", "16000", "-c:a", "pcm_s16le", destino],
                    check=True)
@@ -46,7 +44,13 @@ def com_faster_whisper(audio):
         m = WhisperModel(MODELO_FW, device="cuda", compute_type="float16")
     except Exception:
         m = WhisperModel(MODELO_FW, device="cpu", compute_type="int8")
-    segs, _ = m.transcribe(audio, language=IDIOMA, word_timestamps=True, condition_on_previous_text=False)
+    # entrega o áudio já decodificado (o wav 16 kHz que o ffmpeg extraiu): o leitor de áudio do próprio faster-whisper
+    # quebra com versões novas do PyAV
+    import wave
+    import numpy as np
+    with wave.open(audio) as w:
+        x = np.frombuffer(w.readframes(w.getnframes()), np.int16).astype(np.float32) / 32768
+    segs, _ = m.transcribe(x, language=IDIOMA, word_timestamps=True, condition_on_previous_text=False)
     out = {"text": "", "segments": []}
     for s in segs:
         out["segments"].append({"start": s.start, "end": s.end, "text": s.text,
