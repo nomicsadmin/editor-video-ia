@@ -96,6 +96,8 @@ a, b = [norm(w) for w in esperado], [norm(w) for w in obtido]
 sm = difflib.SequenceMatcher(a=a, b=b, autojunk=False)
 problemas = []
 for op, i1, i2, j1, j2 in sm.get_opcodes():
+    if op == "insert" and j2 - j1 >= 1:
+        problemas.append(f"- `fala sem legenda`: ouvido «{' '.join(obtido[j1:j2])}» perto de «{' '.join(esperado[max(0, i1 - 3):i1 + 2])}» (a transcrição pulou: acrescente no `fix`/legenda ou confira ouvindo)")
     if op in ("delete", "replace"):
         ctx_a = " ".join(esperado[max(0, i1 - 3):i2 + 2])
         problemas.append(f"- `{op}`: esperado «{' '.join(esperado[i1:i2])}» → ouvido «{' '.join(obtido[j1:j2])}» · contexto: …{ctx_a}…")

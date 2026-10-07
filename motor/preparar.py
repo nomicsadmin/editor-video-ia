@@ -119,7 +119,8 @@ def main():
 
     linhas = [f"# Leitura do bruto · {cfg.get('titulo', os.path.basename(proj))}", "",
               "> Gerado por `preparar.py`. Frases quebradas em pausas ≥ 0,5 s. Tempos em segundos do bruto.",
-              "> Uma linha por frase (quebra em pausa ≥ 0,5 s ou em ponto final). `⏸ 1,2 s` = silêncio ≥ 0,3 s antes da frase (candidato a corte).", f"> Folha de contato de cada bruto (1 quadro a cada 2 s): `qa/bruto-<id>.jpg`.", ""]
+              "> Uma linha por frase (quebra em pausa ≥ 0,5 s ou em ponto final). `⏸ 1,2 s` = silêncio ≥ 0,3 s antes da frase (candidato a corte).",
+              "> `⟨61.9–64.7 esticada⟩` = palavra com mais de 0,8 s: quase sempre esconde hesitação (\"é...\"). Corte com `skip` no tempo. Tempo de cada palavra: `transcricoes/<id>.palavras.json`.", f"> Folha de contato de cada bruto (1 quadro a cada 2 s): `qa/bruto-<id>.jpg`.", ""]
     for b in cfg["brutos"]:
         arq = caminho(b["arquivo"])
         m = medir(arq)
@@ -141,7 +142,8 @@ def main():
         for f in fr:
             if ant is not None and f[0]["s"] - ant >= 0.3:
                 linhas.append(f"⏸ {f[0]['s'] - ant:.1f} s")
-            linhas.append(f"[{f[0]['s']:7.2f}–{f[-1]['e']:7.2f}] " + " ".join(w["w"] for w in f))
+            linhas.append(f"[{f[0]['s']:7.2f}–{f[-1]['e']:7.2f}] " + " ".join(
+                w["w"] + (f"⟨{w['s']:.1f}–{w['e']:.1f} esticada⟩" if w["e"] - w["s"] > 0.8 else "") for w in f))
             ant = f[-1]["e"]
         linhas.append("")
         print(f"  {b['id']}: {m['duracao']:.1f} s, {len(ws)} palavras, {len(fr)} frases ({'cache' if do_cache else 'transcrito'})")

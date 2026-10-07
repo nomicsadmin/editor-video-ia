@@ -10,6 +10,7 @@ extra.js         opcional: cena sob medida (efeitos-extras.md)
 assets/          prints, fotos e logos deste vídeo
 referencia/      gerado: ficha e folhas da referência
 leitura.md       gerado: a fala em frases com tempo
+projeto.md       você escreve: o plano, as decisões e cada rodada
 transcricoes/    gerado: cache da transcrição
 qa/              gerado: folhas de contato e relatório da conferência
 _build/          gerado: quadros, voz, linha do tempo
@@ -87,7 +88,8 @@ Tempos em segundos **do bruto** (leia no `leitura.md`). A ordem dos trechos é a
 }
 ```
 - `gapmax`: pausa interna maior que isso sai (0,25 rápido · 0,45 normal · 0,6 conversa).
-- `skip`: pedaços que saem de dentro do trecho (tropeço, repetição).
+- `ritmo`: velocidade de todos os trechos (1,0 a 1,12). Use quando o `base.py` disser que o ritmo ficou abaixo de 2,8 palavras/s.
+- `skip`: pedaços de TEMPO que saem de dentro do trecho (tropeço, repetição, hesitação escondida em palavra `esticada` no `leitura.md`).
 - `speed`: acelera sem mudar o tom da voz (1,1 a 1,2 em fala longa; 2 a 6 em tela sem fala).
 - `fala: false`: trecho sem áudio (gravação de tela). `enquadrar`: `cobrir` (preenche) ou `conter` (cabe inteiro).
 - `layout`: `cheio` · `split` · `claro` · `escuro` (ou troque pela fala, no `cenas.json`).
@@ -100,6 +102,9 @@ Tempos em segundos **do bruto** (leia no `leitura.md`). A ordem dos trechos é a
 `quando` e `ate`: segundos do vídeo final **ou** a fala: `"Claude#2"` (a segunda vez que ela diz Claude),
 `"os três erros"` (sequência de palavras), `"assin*"` (prefixo). A cena sai quando a palavra do `ate` **começa**;
 `ate_fim` sai quando ela termina; sem os dois, fica `dur` segundos (padrão 2,6). `y` = altura do topo da cena (0 a 1).
+Para contar o `#n`, procure a palavra no `leitura.md`; errou a conta, o `render.mjs --qa` avisa "âncora não achada".
+Cena com `quando: 0` aparece já inteira no primeiro quadro (é a capa do reels). Cena que termina a menos de 0,6 s do fim
+fica até o último quadro, sozinha.
 
 ```json
 {
@@ -128,6 +133,9 @@ Tempos em segundos **do bruto** (leia no `leitura.md`). A ordem dos trechos é a
 }
 ```
 - `titulo`: cabeçalho sem caixa, para o topo do `split` ou do fundo `claro`/`escuro` (`"escuro": true` no fundo escuro).
+  Tamanho no split: 110 a 130 (padrão 84 deixa a metade de cima vazia). Sozinho no fundo: 130 a 160.
+- **Tela dividida:** tudo que fica em cima precisa terminar antes da divisão: `y + altura_max ≤ divisao` (ex.: `y 0.1`,
+  `altura_max 0.34` com divisão 0,48). O `--qa` avisa quando uma imagem invade o rosto.
 - `imagem` `modo`: `card` (padrão) · `cheia` (ocupa a tela) · `solto` (PNG recortado). `entrada`: `direita`/`esquerda`.
 - `frase` `fundo`: `video` (escurece atrás) · `claro` · `escuro` (use com o layout igual). Se o texto for a fala
   literal, cada palavra entra no tempo em que é dita.

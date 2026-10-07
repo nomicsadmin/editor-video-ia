@@ -10,8 +10,25 @@
     "Germini": "Gemini"
   },
   "juntar": [
-    ["chat", "gpt", "ChatGPT"],
-    ["claude", "code", "Claude Code"],
-    ["open", "ai", "OpenAI"]
+    [
+      "chat",
+      "gpt",
+      "ChatGPT"
+    ],
+    [
+      "claude",
+      "code",
+      "Claude Code"
+    ],
+    [
+      "open",
+      "ai",
+      "OpenAI"
+    ],
+    [
+      "cloud",
+      "code",
+      "Claude Code"
+    ]
   ]
 }

@@ -37,7 +37,7 @@ const FMT = PJ.formato || {};
 const W = +(FMT.largura || 1080), H = +(FMT.altura || 1920);
 const page = await browser.newPage({ viewport: { width: W, height: H } });
 page.on('pageerror', e => console.error('[erro na página]', e.message));
-page.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') console.log('[página]', m.text()); });
+page.on('console', m => { if ((m.type() === 'error' || m.type() === 'warning') && !/Failed to load resource/.test(m.text())) console.log('[página]', m.text()); }); // arquivo opcional ausente (marca.json, extra.js) não é erro
 const temExtra = fs.existsSync(path.join(PROJ, 'extra.js'));
 await page.addInitScript(v => { window.__temExtra = v; }, temExtra);
 await page.goto(`http://127.0.0.1:${srv.address().port}/index.html`);

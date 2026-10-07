@@ -18,6 +18,8 @@ Os números são faixas, não regra fixa: a referência da pessoa manda mais que
 - Em cima: `titulo` de seção (rótulo + título com uma palavra em destaque), um `card` ou `imagem` (print) por assunto,
   entrando pela direita (`"entrada": "direita"`) como carrossel. `lista` quando ela enumera. `numero` quando cita dado.
 - Post ou página em inglês vira `citacao` TRADUZIDA (`"traduzido": true`); o print original fica em `assets/` como prova.
+- Um `titulo` de seção fixo no topo enquanto o assunto dura (4 a 9 s), e o print ou card embaixo dele. O título amarra
+  o que a pessoa está vendo ao que está ouvindo.
 - O card ocupa a largura (0,88 a 0,92). Fundo de cima vazio por mais de ~1 s é tela morta.
 - Rosto grande: `divisao` entre 0,47 e 0,5. Janela pequena deixa o rosto minúsculo no celular.
 - **Erro que mata:** cards pequenos boiando no fundo e rosto espremido.
@@ -47,6 +49,9 @@ Os números são faixas, não regra fixa: a referência da pessoa manda mais que
 - **Erro que mata:** tela pequena e ilegível no celular. Se não dá para ler, aproxime (`zoom`) ou corte.
 
 ## Para todas
+- **Print sempre recortado no essencial.** Página inteira ou tabela larga fica ilegível no celular. Recorte só o trecho
+  que ela cita (`ffmpeg -i print.png -vf "crop=LARGURA:ALTURA:X:Y" print-recorte.png`) e salve em `assets/`. Tabela:
+  fique com a coluna dos nomes e a coluna que importa.
 - Gancho nos 3 primeiros segundos: a primeira frase dela, sem respiro antes. Se ela enrola no começo, comece na frase forte.
 - Ritmo médio de fala: 2,8 a 3,2 palavras por segundo depois do corte. Abaixo disso, o vídeo arrasta.
 - Duração: o que o conteúdo pede. Corte repetição, não ideia.

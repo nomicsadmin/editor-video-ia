@@ -104,7 +104,10 @@ for (const c of CN.cenas || []) {
   // `ate` = sai quando essa palavra COMEÇA; `ate_fim` = quando ela termina; sem os dois, fica `dur` s (padrão 2,6)
   let t1 = c.ate != null ? ancora(c.ate) : c.ate_fim != null ? ancora(c.ate_fim, true) : null;
   if (t1 == null) t1 = t0 + (c.dur || 2.6);
+  const FIM = TL.frames / FPS;
+  if (t1 > FIM - 0.6) t1 = FIM + 1; // cena que termina perto do fim fica até o último quadro (sem tela vazia no final)
   const cc = Object.assign({}, c, { t0: t0 + (c.atraso || 0), t1 });
+  if (cc.t0 <= 0.05) cc.capa = true; // entra já inteira: o primeiro quadro é a capa do reels
   if (c.src) cc.bmp = await img(c.src.startsWith('marca:') ? '/marca/' + c.src.slice(6) : '/p/' + c.src);
   if (c.logo) cc.logoBmp = await logo(c.logo, c.logo_cor || '#111111');
   if (c.logos) cc.logosBmp = await Promise.all(c.logos.map(n => logo(n, '#111111')));
@@ -195,7 +198,7 @@ function sombraCard() { x.shadowColor = 'rgba(17,18,20,0.22)'; x.shadowBlur = 40
 function semSombra() { x.shadowColor = 'transparent'; x.shadowBlur = 0; x.shadowOffsetY = 0; }
 
 // ---------------------------------------------------------------- cenas
-function vis(c, t) { const ent = eOut(seg(t, c.t0, c.t0 + 0.4)); const sai = 1 - seg(t, c.t1 - 0.25, c.t1); return { a: ent * sai, ent, sai }; }
+function vis(c, t) { const ent = c.capa ? 1 : eOut(seg(t, c.t0, c.t0 + 0.4)); const sai = 1 - seg(t, c.t1 - 0.25, c.t1); return { a: ent * sai, ent, sai }; }
 const tsDaFala = (c, n) => { const ws = words.filter(w => w.t0 >= c.t0 - 0.05 && w.t0 < c.t1); return ws.length >= n ? ws.slice(0, n).map(w => w.t0) : null; };
 
 // pedaço de fita segurando a imagem no topo (receita "conversa crua")
@@ -399,13 +402,13 @@ if (P.modo === 'palavra' && P.y_auto !== false && !(ED.legenda_ajuste && ED.lege
   }
 }
 // na tela dividida o rosto ocupa a metade de baixo: a legenda vai logo abaixo do queixo, acima da interface do app
-let Y_SPLIT = 0.84;
+let Y_SPLIT = 0.84, Y_SPLIT_MAX = 0;
 {
   const D = ED.divisao || 0.48, h = H * (1 - D), zmax = Math.max(...ED.zoom) * (ED.zoom_split || 1.08);
   for (const id in ROSTO) {
     const r = ROSTO[id]; const fy = r.cy - 0.02 + (ED.subir_rosto ?? 0.05); const sh = h / zmax; const sy = clamp(fy * H - sh / 2, 0, H - sh);
     const q = (D * H + (r.queixo * H - sy) * zmax) / H;
-    Y_SPLIT = clamp(q + (ED.legenda_split_dy ?? 0.035), 0.7, 0.86);
+    Y_SPLIT_MAX = Math.max(Y_SPLIT_MAX, clamp(q + (ED.legenda_split_dy ?? 0.035), 0.7, 0.86)); Y_SPLIT = Y_SPLIT_MAX;
   }
 }
 const caixa = s => P.caixa === 'minusculas' ? s.toLowerCase() : P.caixa === 'maiusculas' ? s.toUpperCase() : s;
@@ -513,7 +516,9 @@ window.__qa = () => {
   for (let i = 1; i < cs.length; i++) if (cs[i].t0 < cs[i - 1].t1 - 0.3 && (cs[i].y ?? 0.15) === (cs[i - 1].y ?? 0.15)) sobrepostas.push(`${cs[i - 1].tipo}@${cs[i - 1].t0.toFixed(1)} × ${cs[i].tipo}@${cs[i].t0.toFixed(1)}`);
   const naLegenda = CENAS.filter(c => ['numero', 'frase', 'card', 'selo', 'logo', 'logos'].includes(c.tipo) && c.y != null && Math.abs(c.y - Y_LEG) < 0.07).map(c => `${c.tipo}@${c.t0.toFixed(1)} (y ${c.y}) encosta na legenda (y ${Y_LEG})`);
   const desconhecidas = CENAS.filter(c => !DESENHA[c.tipo]).map(c => `${c.tipo}@${c.t0.toFixed(1)} (tipo que o motor não desenha: só aparece se o extra.js desenhar)`);
-  return { cenas_na_altura_da_legenda: naLegenda, legenda: { estilo: ED.legenda, y: Y_LEG, y_split: +Y_SPLIT.toFixed(3), motivo: Y_MOTIVO }, duracao_s: +(TL.frames / FPS).toFixed(2), pedacos: SEGS.length, palavras: words.length, paginas_legenda: paginas.length, cenas: CENAS.map(c => `${c.tipo} ${c.t0.toFixed(2)}–${c.t1.toFixed(2)}`), legenda_reduzida: estouro, cenas_sobrepostas: sobrepostas, tipos_desconhecidos: desconhecidas, avisos };
+  const D = ED.divisao || 0.48; const usaSplit = LAYS.some(l => l.layout === 'split') || SEGS.some(s => s.layout === 'split');
+  const invadeRosto = usaSplit ? CENAS.filter(c => c.tipo === 'imagem' && (c.modo || 'card') === 'card' && (c.y ?? 0.12) + (c.altura_max || 0.42) > D + 0.005).map(c => `imagem@${c.t0.toFixed(1)}: y ${c.y ?? 0.12} + altura_max ${c.altura_max || 0.42} passa da divisão ${D} (se estiver no split, invade o rosto)`) : [];
+  return { invade_rosto_no_split: invadeRosto, cenas_na_altura_da_legenda: naLegenda, legenda: { estilo: ED.legenda, y: Y_LEG, y_split: +Y_SPLIT.toFixed(3), motivo: Y_MOTIVO }, duracao_s: +(TL.frames / FPS).toFixed(2), pedacos: SEGS.length, palavras: words.length, paginas_legenda: paginas.length, cenas: CENAS.map(c => `${c.tipo} ${c.t0.toFixed(2)}–${c.t1.toFixed(2)}`), legenda_reduzida: estouro, cenas_sobrepostas: sobrepostas, tipos_desconhecidos: desconhecidas, avisos };
 };
 window.__cenas = () => CENAS.map(c => ({ tipo: c.tipo, t0: +c.t0.toFixed(3), t1: +c.t1.toFixed(3), n: (c.logos || c.itens || [1]).length, passo: c.passo || 0.25, fundo: c.fundo || null })).concat(LAYS.map((l, i) => ({ tipo: 'layout', t0: +l.t0.toFixed(3), t1: +l.t0.toFixed(3), de: i ? LAYS[i - 1].layout : null, para: l.layout })));
 window.__ready = true;

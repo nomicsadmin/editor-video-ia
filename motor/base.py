@@ -336,5 +336,7 @@ grava(os.path.join(OUT, "voz.wav"), voz)
 json.dump(dict(frames=fcount, fps=FPS, w=W, h=H, segs=segs, words=words), open(os.path.join(OUT, "timeline.json"), "w"),
           ensure_ascii=False, indent=1)
 dur_bruto = sum(b.get("duracao", 0) for b in CFG["brutos"])
+ritmo_final = len(words) / max(fcount / FPS, 0.1)
+print(f"  ritmo depois do corte: {ritmo_final:.2f} palavras/s (alvo 2,8 a 3,2; abaixo arrasta, acima cansa)")
 print(f"  base pronta: {fcount} quadros · {fcount / FPS:.1f} s (bruto {dur_bruto:.1f} s) · {len(words)} palavras · "
       f"{sum(w['bip'] for w in words)} bips · {len(segs)} pedaços")
