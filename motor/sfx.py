@@ -7,6 +7,7 @@ Regra: o efeito acompanha a ENTRADA DE ELEMENTO, não o corte seco.
   - tique leve em cada item de lista
 Uso:  python3 sfx.py <pasta-do-projeto>  → _build/sfx.wav
 """
+import _utf8  # noqa: F401 (Windows em UTF-8)
 import json
 import os
 import sys

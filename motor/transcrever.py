@@ -7,6 +7,7 @@ Transcrição local, palavra a palavra, sem mandar o áudio para nenhum servidor
 Uso:  <python do projeto> motor/transcrever.py <video-ou-audio> <saida_base>
 Gera <saida_base>.json (segmentos + palavras com tempo), .txt e .srt.
 """
+import _utf8  # noqa: F401 (Windows em UTF-8)
 import json
 import os
 import subprocess

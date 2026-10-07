@@ -13,6 +13,7 @@ O que ele faz:
 
 Uso:  python3 base.py <pasta-do-projeto>
 """
+import _utf8  # noqa: F401 (Windows em UTF-8)
 import json
 import os
 import re

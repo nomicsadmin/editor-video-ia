@@ -4,6 +4,7 @@ Onde está o rosto (Windows e Mac sem as ferramentas da Apple): OpenCV, local, s
 Mesma saída do rosto.swift: JSON com a caixa do maior rosto de cada quadro (0 a 1, origem no topo) e a mediana.
 Uso:  python motor/rosto.py <pasta-com-jpgs>
 """
+import _utf8  # noqa: F401 (Windows em UTF-8)
 import json
 import os
 import sys

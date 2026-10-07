@@ -8,6 +8,7 @@ Etapa final · conferência ANTES de mostrar (se você não publicaria, não mos
 Grava <projeto>/qa/relatorio.md.
 Uso:  python3 qa.py <pasta-do-projeto>
 """
+import _utf8  # noqa: F401 (Windows em UTF-8)
 import difflib
 import json
 import os

@@ -10,6 +10,7 @@ Link (Instagram, TikTok, YouTube): baixa sozinho. Se o site pedir login, usa o l
 neste computador (nada sai da máquina). Na primeira vez o Mac pode pedir a senha do Chaveiro: é normal.
 Saída: <pasta>/ficha.json, <pasta>/folha.jpg, <pasta>/cortes.jpg
 """
+import _utf8  # noqa: F401 (Windows em UTF-8)
 import json
 import os
 import re

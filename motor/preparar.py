@@ -13,6 +13,7 @@ lê isso para decidir os cortes).
 
 Uso:  .venv/bin/python motor/preparar.py <pasta-do-projeto>   (Windows: .venv/Scripts/python)
 """
+import _utf8  # noqa: F401 (Windows em UTF-8)
 import json
 import os
 import shutil
@@ -53,7 +54,9 @@ def transcrever(arq, destino_base):
     assinatura = f"{os.path.getsize(arq)}:{int(os.path.getmtime(arq))}"
     if os.path.exists(js) and os.path.exists(marca) and open(marca).read().strip() == assinatura:
         return json.load(open(js)), True
-    subprocess.run([VENV_PY, TRANSCREVER, arq, destino_base], check=True, capture_output=True)
+    r = subprocess.run([VENV_PY, TRANSCREVER, arq, destino_base], capture_output=True, text=True)
+    if r.returncode:
+        sys.exit(f"A transcrição falhou:\n{r.stderr[-1500:]}")
     open(marca, "w").write(assinatura)
     return json.load(open(js)), False
 

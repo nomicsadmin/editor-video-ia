@@ -4,6 +4,7 @@ Conferência rápida do corte SÓ pelo áudio, antes do render: retranscreve _bu
 compara com as palavras que deviam estar lá. Leva ~10 s. Use depois de cada base.py.
   python3 checar_voz.py <pasta-do-projeto>
 """
+import _utf8  # noqa: F401 (Windows em UTF-8)
 import difflib, json, os, re, subprocess, sys, unicodedata
 M = os.path.dirname(os.path.abspath(__file__))
 RAIZ = os.path.abspath(os.path.join(M, ".."))
