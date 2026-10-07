@@ -1,0 +1,23 @@
+{
+  "titulo": "Vídeo de teste do editor",
+  "saida": "exemplo-editado",
+  "brutos": [
+    {
+      "id": "v1",
+      "arquivo": "docs/exemplo/bruto.mp4",
+      "duracao": 12.795,
+      "largura": 1080,
+      "altura": 1920,
+      "fps": 30.0,
+      "rosto": null
+    }
+  ],
+  "edicao": {
+    "legenda": "palavra",
+    "cor": "destaque",
+    "zoom": [
+      1.0,
+      1.08
+    ]
+  }
+}

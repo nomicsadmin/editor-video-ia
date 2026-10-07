@@ -1,0 +1,3 @@
+numpy>=2.0
+mlx-whisper>=0.4 ; platform_machine == "arm64" and sys_platform == "darwin"
+faster-whisper>=1.1 ; platform_machine != "arm64"

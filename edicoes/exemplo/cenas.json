@@ -1,0 +1,8 @@
+{
+  "cenas": [
+    { "tipo": "selo", "texto": "Teste", "quando": 0.2, "dur": 2.2, "y": 0.09 },
+    { "tipo": "card", "rotulo": "O seu editor", "titulo": "Corta pela fala", "destaque": "fala", "quando": "corta", "ate": "coloca", "y": 0.16 },
+    { "tipo": "lista", "titulo": "O que ele faz", "itens": ["Corte", "Legenda", "Telas"], "destaque": "fala", "passo": 1.1, "quando": "coloca", "ate": "Se", "y": 0.12 },
+    { "tipo": "frase", "texto": "está tudo funcionando", "destaque": "funcionando", "quando": "tudo", "y": 0.22 }
+  ]
+}

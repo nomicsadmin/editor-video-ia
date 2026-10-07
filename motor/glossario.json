@@ -1,0 +1,17 @@
+{
+  "_leia": "Correções da transcrição que valem para TODO vídeo seu (o transcritor erra sempre igual). Correção de um vídeo só vai no `fix` do edl.json. Achou um erro que se repete (nome do seu produto, seu sobrenome)? Acrescente aqui.",
+  "fix": {
+    "Cloud": "Claude",
+    "cloud": "Claude",
+    "Cláudio": "Claude",
+    "Antropic": "Anthropic",
+    "Sonet": "Sonnet",
+    "Jemini": "Gemini",
+    "Germini": "Gemini"
+  },
+  "juntar": [
+    ["chat", "gpt", "ChatGPT"],
+    ["claude", "code", "Claude Code"],
+    ["open", "ai", "OpenAI"]
+  ]
+}

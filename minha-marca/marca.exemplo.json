@@ -1,0 +1,11 @@
+{
+  "nome": "Sua marca",
+  "cores": { "destaque": "#FF5A1F", "cor2": "#2F6BFF", "cor3": "#1BA97A",
+             "claro": "#F5F3EF", "escuro": "#111214", "tinta": "#16171A", "suave": "#6E6F76" },
+  "fontes": {
+    "titulo": ["Nome da fonte do título", "arquivo-do-titulo.woff2", "700"],
+    "texto": ["Nome da fonte do texto", "arquivo-do-texto.woff2", "500"],
+    "legenda": ["Nome da fonte da legenda", "arquivo-da-legenda.woff2", "800"]
+  },
+  "logo": "logo.png"
+}

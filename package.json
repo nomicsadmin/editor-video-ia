@@ -1,0 +1,15 @@
+{
+  "name": "editor-video-ia",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Editor de vídeo dentro do Claude Code: manda o vídeo, o briefing e a referência; recebe o .mp4 editado.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "setup": "bash scripts/setup.sh",
+    "diagnostico": "bash scripts/diagnostico.sh"
+  },
+  "dependencies": {
+    "playwright": "1.58.2"
+  }
+}

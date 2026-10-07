@@ -1,0 +1,21 @@
+.venv/
+node_modules/
+.DS_Store
+# o que é seu fica só no seu computador
+meus-videos/*
+!meus-videos/LEIA-ME.md
+minhas-referencias/*
+!minhas-referencias/LEIA-ME.md
+edicoes/*
+!edicoes/LEIA-ME.md
+!edicoes/exemplo/
+edicoes/exemplo/_build/
+edicoes/exemplo/*.mp4
+minha-marca/*
+!minha-marca/LEIA-ME.md
+!minha-marca/marca.exemplo.json
+_build/
+edicoes/exemplo/transcricoes/
+edicoes/exemplo/qa/
+edicoes/exemplo/leitura.md
+motor/_bin/
