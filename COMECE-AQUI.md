@@ -32,9 +32,8 @@ pronto (`motor/`). O seu trabalho é instalar, entender o que ela quer e editar 
 4. Rode o diagnóstico de novo até ficar tudo ✅.
 
 ### Etapa 2 · Vídeo de teste (1 minuto)
-Rode `bash motor/montar.sh edicoes/exemplo` (vídeo de exemplo que vem no projeto, sem rosto de ninguém) e abra o
-resultado. Diga a ela: "Funcionou. Agora me manda um vídeo seu."
-Se `edicoes/exemplo` não existir, pule: o primeiro vídeo dela serve de teste.
+O setup já edita o vídeo de exemplo (sem rosto de ninguém). Abra `edicoes/exemplo/exemplo-editado.mp4` para ela ver
+e diga: "Funcionou. Agora me manda um vídeo seu." Para rodar de novo: `bash motor/montar.sh edicoes/exemplo`.
 
 ### Etapa 3 · A marca dela (uma vez, opcional)
 Pergunte: `1 tenho cores, fonte e logo · 2 só a logo · 3 usa o visual neutro`.

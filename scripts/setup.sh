@@ -42,4 +42,13 @@ if swiftc -O motor/rosto.swift -o motor/_bin/rosto 2>/dev/null; then ok "detecto
   xcode-select --install 2>/dev/null; falta "detector de rosto"; fi
 
 echo ""
-bash scripts/diagnostico.sh
+bash scripts/diagnostico.sh || exit 1
+
+echo ""
+echo "7 · Vídeo de teste (uns 30 segundos; na primeira vez baixa o modelo do transcritor, ~1,5 GB)"
+if bash motor/montar.sh edicoes/exemplo > edicoes/exemplo/teste.log 2>&1; then
+  ok "vídeo de teste pronto: edicoes/exemplo/exemplo-editado.mp4"
+  grep "QA:" edicoes/exemplo/teste.log | sed 's/^ */  /'
+else
+  falta "o vídeo de teste falhou (detalhe em edicoes/exemplo/teste.log). Cole o fim desse arquivo no Claude."
+fi

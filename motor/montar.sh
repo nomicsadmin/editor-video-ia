@@ -12,6 +12,8 @@ SAIDA=$(python3 -c "import json,os,sys; c=json.load(open('$P/projeto.json')); pr
 TRILHA=$(python3 -c "import json; c=json.load(open('$P/projeto.json')); print((c.get('edicao') or {}).get('trilha') or '')")
 
 if [ "${2:-}" != "--so-mix" ]; then
+  # projeto novo (ou bruto trocado): mede e transcreve antes de cortar
+  if ! ls "$P"/transcricoes/*.palavras.json >/dev/null 2>&1; then "$PY" "$M/preparar.py" "$P"; fi
   "$PY" "$M/base.py" "$P"
   node "$M/render.mjs" "$P"
 fi
