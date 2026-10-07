@@ -41,7 +41,7 @@ Corte pela fala, legenda palavra a palavra, telas que entram na palavra certa e 
 **Não precisa saber editar nem programar.** A IA conduz o mesmo processo que usamos para editar os nossos vídeos: lê a sua fala, mostra o plano, só corta depois do seu "pode" e confere tudo antes de te mostrar.
 
 **1. Baixe o projeto e abra no Claude Code**
-Clique em **Code > Download ZIP**, descompacte e abra a pasta no app [Claude Code](https://claude.com/claude-code). Precisa de um plano do Claude que inclua o Claude Code. Funciona em **Mac** e em **Windows 10/11** (no Windows, o Claude Code já usa o Git Bash, que é onde o editor roda).
+Clique em **Code > Download ZIP**, descompacte e abra a pasta no app [Claude Code](https://claude.com/claude-code). Precisa de um plano do Claude que inclua o Claude Code. Funciona em **Mac** e em **Windows 10/11** (no Windows, o Claude Code já usa o Git Bash, que é onde o editor roda). **Escolha o modelo Opus 5.5** no seletor de modelo (no terminal: `/model`): é ele que segue o roteiro do começo ao fim.
 
 **2. Cole esta frase na IA**
 ```text

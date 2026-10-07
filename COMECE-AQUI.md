@@ -1,6 +1,6 @@
 # COMECE AQUI · Roteiro para a IA preparar e usar o seu editor de vídeo
 
-> **Você é uma pessoa?** Não precisa ler este arquivo. Abra esta pasta no Claude Code e cole:
+> **Você é uma pessoa?** Não precisa ler este arquivo. Abra esta pasta no Claude Code, escolha o modelo **Opus 5.5** e cole:
 >
 > **`Leia o COMECE-AQUI.md e prepare o meu editor de vídeo.`**
 >
