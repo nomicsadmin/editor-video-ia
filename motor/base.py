@@ -187,6 +187,7 @@ def texto_entre(bid, t0, t1):
 
 AJUSTES = []
 FIM_PROTEGIDO = {}
+EMITIDAS = set()
 
 
 def proteger_bordas(i, S):
@@ -284,7 +285,8 @@ for i, S in enumerate(EDL["trechos"]):
     speed = S.get("speed", RITMO)
     fala = S.get("fala", True)
     todas = palavras(bid)
-    ws = [w for w in todas if w["s"] >= a - 0.05 and w["e"] <= b + 0.3 and w["s"] < b] if fala else []
+    # palavra na emenda entre trechos (o transcritor marca o início cedo): entra uma vez só, no trecho que tem o som dela
+    ws = [w for w in todas if w["s"] >= a - 0.15 and w["e"] <= b + 0.3 and w["s"] < b and (bid, w["s"]) not in EMITIDAS] if fala else []
     for w in todas:  # palavra que começa dentro do trecho mas termina depois da borda: some da fala sem aviso
         if fala and a <= w["s"] < b and w["e"] > b + 0.3:
             print(f"  ⚠️  trecho {i + 1}: «{w['w']}» ({w['s']:.2f}–{w['e']:.2f}) passa da borda b={b}; aumente o b ou corte antes dela", flush=True)
@@ -343,7 +345,7 @@ for i, S in enumerate(EDL["trechos"]):
                 v = vale(bid, sa, -1, alcance=1.2)
                 if v is not None:
                     AJUSTES.append(f"trecho {i + 1}: borda {sa:.2f} → {v:.2f} (fala colada; voltou «{texto_entre(bid, v, sa)}»)"); sa = v
-            novas = [w for w in todas if id(w) not in usadas and w["s"] >= sa - 0.02 and w["e"] <= sb + 0.3 and w["s"] < sb]
+            novas = [w for w in todas if id(w) not in usadas and (bid, w["s"]) not in EMITIDAS and w["s"] >= sa - 0.12 and w["e"] <= sb + 0.3 and w["s"] < sb]
             usadas |= {id(w) for w in novas}
             pw = sorted(pw + novas, key=lambda w: w["s"])
             prot.append((sa, sb, pw))
@@ -382,7 +384,7 @@ for i, S in enumerate(EDL["trechos"]):
             cortados += [(pa, pb, g) for (pa, pb), g in zip(partes, grupos)]
         spans = cortados
     if ULTIMO.get(bid) is not None and spans and spans[0][0] < ULTIMO[bid]:  # trecho anterior do mesmo bruto
-        spans[0] = (ULTIMO[bid], spans[0][1], [w for w in spans[0][2] if w["s"] >= ULTIMO[bid] - 0.05])
+        spans[0] = (ULTIMO[bid], spans[0][1], [w for w in spans[0][2] if w["s"] >= ULTIMO[bid] - 0.15])
     if spans: ULTIMO[bid] = spans[-1][1]
     for k, (sa, sb, pw) in enumerate(spans):
         nfr = max(1, round((sb - sa) / speed * FPS))
@@ -394,6 +396,7 @@ for i, S in enumerate(EDL["trechos"]):
         for w in pw:
             txt, bip = corrigir(w["w"])
             txt = caixa_frase(txt, words[-1]["w"] if words else ".")
+            EMITIDAS.add((bid, w["s"]))
             words.append(dict(t0=round(o0 + (max(w["s"], sa) - sa) / speed, 3), t1=round(o0 + (min(w["e"], sb) - sa) / speed, 3),
                               w=txt, bip=bip, src=[bid, w["s"], w["e"]]))
         extrair(bid, sa, sb, speed, nfr, S.get("enquadrar", "cobrir"), fala)
