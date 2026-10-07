@@ -7,6 +7,8 @@ set -euo pipefail
 M="$(cd "$(dirname "$0")" && pwd)"
 PY="$M/../.venv/bin/python"; [ -x "$PY" ] || PY="$M/../.venv/Scripts/python.exe"  # Mac · Windows (Git Bash)
 P="$(cd "$1" && pwd)"
+# Windows (Git Bash): Python, Node e ffmpeg do Windows não entendem /c/Users/...; usa C:/Users/...
+if command -v cygpath >/dev/null 2>&1; then M="$(cygpath -m "$M")"; P="$(cygpath -m "$P")"; fi
 B="$P/_build"
 SAIDA=$("$PY" -c "import json,os,sys; c=json.load(open('$P/projeto.json')); print(c.get('saida') or os.path.basename('$P'))")
 TRILHA=$("$PY" -c "import json; c=json.load(open('$P/projeto.json')); print((c.get('edicao') or {}).get('trilha') or '')")
