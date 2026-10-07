@@ -59,7 +59,10 @@ linhas += ["## Render", "", "| Item | Valor |", "|---|---|",
 # 1b · pedaços vizinhos dividindo o mesmo áudio = sílaba repetida ("então... ão")
 sobre = [(round(p["b"] - q["a"], 2), round(q["o0"], 1)) for p, q in zip(tl["segs"], tl["segs"][1:])
          if q["bruto"] == p["bruto"] and q["a"] < p["b"] - 0.005]
-linhas += ["## Cortes", "", (f"⚠️ {len(sobre)} ponto(s) com áudio repetido entre pedaços: {sobre}" if sobre else "Nenhum pedaço repete áudio do vizinho ✅"), ""]
+em_som = tl.get("cortes_em_som", [])
+linhas += ["## Cortes", "", (f"⚠️ {len(sobre)} ponto(s) com áudio repetido entre pedaços: {sobre}" if sobre else "Nenhum pedaço repete áudio do vizinho ✅"),
+           (f"❌ {len(em_som)} corte(s) em cima de fala (come o fim ou o começo de uma palavra, mesmo que a retranscrição não perceba):" if em_som else "Nenhum corte em cima de fala ✅")]
+linhas += [f"   - aos {c['onde']:.2f} s ({c['lado']}), perto de «{c['perto']}»" for c in em_som] + [""]
 
 # 2 · folhas
 subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", SAIDA, "-vf", "fps=1/1.5,scale=216:-2,tile=8x" + str(max(1, int(dur / 1.5 / 8) + 1)),
@@ -116,4 +119,4 @@ except Exception:
 linhas += ["## Compositor", "", "```json", json.dumps(cq, ensure_ascii=False, indent=1), "```", ""]
 
 open(os.path.join(Q, "relatorio.md"), "w", encoding="utf-8").write("\n".join(linhas))
-print(f"  QA: {lufs} LUFS / {pico} dBTP · fala {taxa * 100:.1f}% · {len(problemas)} divergência(s) · qa/relatorio.md")
+print(f"  QA: {lufs} LUFS / {pico} dBTP · fala {taxa * 100:.1f}% · {len(problemas)} divergência(s) · {len(em_som)} corte(s) em cima de fala · qa/relatorio.md")

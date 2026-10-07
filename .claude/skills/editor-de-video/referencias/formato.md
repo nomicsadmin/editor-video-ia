@@ -89,7 +89,7 @@ Tempos em segundos **do bruto** (leia no `leitura.md`). A ordem dos trechos é a
 }
 ```
 - `gapmax`: pausa interna maior que isso sai (0,25 rápido · 0,45 normal · 0,6 conversa).
-- `ritmo`: velocidade de todos os trechos (1,0 a 1,12). Use quando o `base.py` disser que o ritmo ficou abaixo de 2,8 palavras/s.
+- `ritmo`: velocidade de todos os trechos (padrão 1,0). Só mude se a pessoa pedir o vídeo mais rápido (até 1,1).
 - `skip`: pedaços de TEMPO que saem de dentro do trecho (tropeço, repetição, hesitação escondida em palavra `esticada` no `leitura.md`).
 - Palavra esticada por cima de hesitação engana o `skip` (a palavra certa some junto). Retranscreva só o trecho
   (`ffmpeg -ss A -to B -i bruto trecho.wav` + `motor/transcrever.py`), corrija o tempo dela em

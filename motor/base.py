@@ -97,16 +97,23 @@ ENV = {}
 
 
 def envelope(bid):
+    """Quanto o som está acima do silêncio, a cada 10 ms, em dB (0 = limiar de fala).
+    Olha DUAS faixas: o volume (vogais) e os agudos acima de 3 kHz (o "s", o "f", o "x" do fim das palavras).
+    Só o volume não basta: o "s" final de "perguntas" é baixo em volume e o corte o tomava por silêncio."""
     if bid not in ENV:
-        r = subprocess.run(["ffmpeg", "-v", "error", "-i", BRUTO[bid], "-vn", "-ac", "1", "-ar", "16000", "-f", "s16le", "-"],
-                           capture_output=True, check=True)
-        x = np.frombuffer(r.stdout, np.int16).astype(np.float32) / 32768
-        n = len(x) // 160
-        e = 20 * np.log10(np.sqrt((x[:n * 160].reshape(n, 160) ** 2).mean(1)) + 1e-9)  # janelas de 10 ms
-        piso, p90 = np.percentile(e, 15), np.percentile(e, 90)
-        # limiar adaptativo: em gravação barulhenta (carro) a fala fica só 5–12 dB acima do ruído,
-        # e um limiar fixo de +9 dB tratava fala baixa como silêncio 
-        ENV[bid] = (e, piso + min(9.0, max(3.0, 0.3 * (p90 - piso))))
+        def faixa(filtro):
+            r = subprocess.run(["ffmpeg", "-v", "error", "-i", BRUTO[bid], "-vn", "-ac", "1", "-ar", "16000", *filtro, "-f", "s16le", "-"],
+                               capture_output=True, check=True)
+            x = np.frombuffer(r.stdout, np.int16).astype(np.float32) / 32768
+            n = len(x) // 160
+            e = 20 * np.log10(np.sqrt((x[:n * 160].reshape(n, 160) ** 2).mean(1)) + 1e-9)  # janelas de 10 ms
+            piso, p90 = np.percentile(e, 15), np.percentile(e, 90)
+            # limiar adaptativo: em gravação barulhenta (carro) a fala fica só 5–12 dB acima do ruído
+            return e - (piso + min(9.0, max(3.0, 0.3 * (p90 - piso))))
+        cheio = faixa([])
+        agudo = faixa(["-af", "highpass=f=3000,highpass=f=3000"])
+        n = min(len(cheio), len(agudo))
+        ENV[bid] = (np.maximum(cheio[:n], agudo[:n]), 0.0)
     return ENV[bid]
 
 
@@ -142,6 +149,84 @@ def silencios(bid, sa, sb, minimo):
     if ini is not None and (i1 - ini) / 100 >= minimo:
         out.append((ini / 100, i1 / 100))
     return out
+
+
+# ---------------------------------------------------------------- corte só em pausa real (nunca em fala colada)
+def em_som(bid, t):
+    """True se há fala dos dois lados de t: cortar aqui come o fim de uma palavra ou o começo da outra."""
+    e, lim = envelope(bid)
+    q = lambda t0, t1: e[max(0, int(t0 * 100)):max(int(t0 * 100) + 1, int(t1 * 100))].max()
+    return q(t - 0.03, t) > lim + 4 and q(t, t + 0.03) > lim + 4
+
+
+def em_som_perto(bid, t):
+    return any(em_som(bid, t + d) for d in (-0.04, -0.02, 0.0, 0.02, 0.04))
+
+
+def vale(bid, t, direcao, alcance=1.6, minimo=8):
+    """Primeira pausa real (>= 80 ms abaixo do limiar de fala; menos que isso pode ser o fechamento de um "p", "t", "c",
+    dentro da palavra) andando a partir de t (+1 frente, -1 trás).
+    Devolve o meio da pausa, ou None se a fala segue colada por todo o alcance."""
+    e, lim = envelope(bid)
+    i = int(t * 100); fim = int((t + direcao * alcance) * 100)
+    corrida = 0
+    while 0 <= i < len(e) and (i - fim) * direcao <= 0:
+        if e[i] <= lim + 1:
+            corrida += 1
+            if corrida >= minimo:
+                return (i - direcao * (minimo // 2)) / 100
+        else:
+            corrida = 0
+        i += direcao
+    return None
+
+
+def texto_entre(bid, t0, t1):
+    return " ".join(w["w"] for w in palavras(bid) if w["e"] > t0 + 0.02 and w["s"] < t1 - 0.02)
+
+
+AJUSTES = []
+FIM_PROTEGIDO = {}
+
+
+def proteger_bordas(i, S):
+    """Move as bordas do trecho e dos skips para a pausa real mais próxima, sempre para o lado que MANTÉM fala.
+    Melhor sobrar uma palavra do que comer meia."""
+    if not S.get("fala", True):
+        return
+    bid = S["bruto"]
+    dur = next((b.get("duracao") for b in CFG["brutos"] if b["id"] == bid), None) or 1e9
+    if S["a"] > 0.05 and em_som_perto(bid, S["a"]):
+        v = vale(bid, S["a"], -1)
+        if v is not None:
+            AJUSTES.append(f"trecho {i + 1}: início {S['a']:.2f} → {v:.2f} (fala colada; ficou «{texto_entre(bid, v, S['a'])}»)")
+            S["a"] = round(v, 3)
+    if S["b"] < dur - 0.05 and em_som_perto(bid, S["b"]):
+        v = vale(bid, S["b"], +1)
+        if v is not None:
+            AJUSTES.append(f"trecho {i + 1}: fim {S['b']:.2f} → {v:.2f} (fala colada; ficou «{texto_entre(bid, S['b'], v)}»)")
+            S["b"] = round(v, 3)
+    novos = []
+    for x0, x1 in S.get("skip", []):
+        # skip só fica se as DUAS bordas caem numa pausa real (tolerância de 0,12 s). Fala emendada não se corta.
+        y0 = x0 if not em_som_perto(bid, x0) else vale(bid, x0 - 0.12, +1, alcance=0.24)
+        y1 = x1 if not em_som_perto(bid, x1) else vale(bid, x1 + 0.12, -1, alcance=0.24)
+        if y0 is not None and y1 is not None and y1 - y0 >= 0.12:
+            if (y0, y1) != (x0, x1):
+                AJUSTES.append(f"trecho {i + 1}: skip {x0:.2f}–{x1:.2f} → {y0:.2f}–{y1:.2f} (bordas na pausa real)")
+            novos.append([round(y0, 3), round(y1, 3)])
+        else:
+            AJUSTES.append(f"trecho {i + 1}: skip {x0:.2f}–{x1:.2f} DESCARTADO: fala emendada, sem pausa para cortar («{texto_entre(bid, x0, x1)}» ficou)")
+    if "skip" in S:
+        S["skip"] = novos
+    # o trecho anterior do mesmo bruto pode ter crescido até aqui: começa onde ele termina (sem repetir fala)
+    ant = FIM_PROTEGIDO.get(bid)
+    S["_continua"] = False
+    if ant is not None and ant[0] < S["a"] <= ant[1] + 0.02:  # o anterior cresceu até aqui (ou encosta): emenda, sem repetir fala
+        if S["a"] < ant[1] - 0.05:
+            AJUSTES.append(f"trecho {i + 1}: início {S['a']:.2f} → {ant[1]:.2f} (o trecho anterior já tem essa fala)")
+        S["a"] = ant[1]; S["_continua"] = True
+    FIM_PROTEGIDO[bid] = (S["a"], S["b"])
 
 
 # ---------------------------------------------------------------- extração
@@ -191,7 +276,10 @@ GAP = EDL.get("gapmax", 0.5)
 ULTIMO = {}
 RITMO = EDL.get("ritmo", 1.0)
 segs, words = [], []
+I_ZOOM = -1
 for i, S in enumerate(EDL["trechos"]):
+    proteger_bordas(i, S)
+    I_ZOOM = I_ZOOM if S.get("_continua") else i
     bid, a, b = S["bruto"], S["a"], S["b"]
     speed = S.get("speed", RITMO)
     fala = S.get("fala", True)
@@ -243,6 +331,23 @@ for i, S in enumerate(EDL["trechos"]):
     else:
         spans = [(a, b, [w for w, ok in zip(ws, fica) if ok])]
     dur_bruto = next((b.get("duracao") for b in CFG["brutos"] if b["id"] == bid), None)
+    if fala:  # última proteção: borda de pedaço em cima de fala anda para a pausa real, para o lado que MANTÉM som
+        prot = []
+        usadas = {id(w) for _, _, pw0 in spans for w in pw0}
+        for sa, sb, pw in spans:
+            if sb < (dur_bruto or 1e9) - 0.05 and em_som_perto(bid, sb):
+                v = vale(bid, sb, +1, alcance=1.2)
+                if v is not None:
+                    AJUSTES.append(f"trecho {i + 1}: borda {sb:.2f} → {v:.2f} (fala colada; voltou «{texto_entre(bid, sb, v)}»)"); sb = v
+            if sa > 0.05 and em_som_perto(bid, sa):
+                v = vale(bid, sa, -1, alcance=1.2)
+                if v is not None:
+                    AJUSTES.append(f"trecho {i + 1}: borda {sa:.2f} → {v:.2f} (fala colada; voltou «{texto_entre(bid, v, sa)}»)"); sa = v
+            novas = [w for w in todas if id(w) not in usadas and w["s"] >= sa - 0.02 and w["e"] <= sb + 0.3 and w["s"] < sb]
+            usadas |= {id(w) for w in novas}
+            pw = sorted(pw + novas, key=lambda w: w["s"])
+            prot.append((sa, sb, pw))
+        spans = prot
     spans = [(max(0.0, sa), min(sb, dur_bruto) if dur_bruto else sb, pw) for sa, sb, pw in spans]  # o 1º corte nunca começa antes do zero
     # pedaços vizinhos não podem dividir o mesmo áudio: a folga do snap de um invadia a do outro e o fim
     # da palavra tocava duas vezes ("então... ão"). Corta no ponto mais silencioso.
@@ -277,12 +382,12 @@ for i, S in enumerate(EDL["trechos"]):
             cortados += [(pa, pb, g) for (pa, pb), g in zip(partes, grupos)]
         spans = cortados
     if ULTIMO.get(bid) is not None and spans and spans[0][0] < ULTIMO[bid]:  # trecho anterior do mesmo bruto
-        spans[0] = (ULTIMO[bid], spans[0][1], spans[0][2])
+        spans[0] = (ULTIMO[bid], spans[0][1], [w for w in spans[0][2] if w["s"] >= ULTIMO[bid] - 0.05])
     if spans: ULTIMO[bid] = spans[-1][1]
     for k, (sa, sb, pw) in enumerate(spans):
         nfr = max(1, round((sb - sa) / speed * FPS))
         o0 = fcount / FPS
-        segs.append(dict(i=i, k=k, bruto=bid, a=round(sa, 3), b=round(sb, 3), o0=round(o0, 4), o1=round(o0 + nfr / FPS, 4),
+        segs.append(dict(i=I_ZOOM, k=k, bruto=bid, a=round(sa, 3), b=round(sb, 3), o0=round(o0, 4), o1=round(o0 + nfr / FPS, 4),
                          f0=fcount + 1, n=nfr, speed=speed, fala=fala,
                          zoom=S.get("zoom", "auto"), foco=S.get("foco"), layout=S.get("layout", "cheio"),
                          enquadrar=S.get("enquadrar", "cobrir"), cena=S.get("cena")))
@@ -333,9 +438,27 @@ for w in words:
     voz[i0:i1] = tom
 grava(os.path.join(OUT, "voz.wav"), voz)
 
-json.dump(dict(frames=fcount, fps=FPS, w=W, h=H, segs=segs, words=words), open(os.path.join(OUT, "timeline.json"), "w"),
+# conferência final das bordas: algum pedaço ainda começa ou termina em cima de fala?
+EM_SOM = []
+for k, s in enumerate(segs):
+    if not s["fala"]:
+        continue
+    nx = segs[k + 1] if k + 1 < len(segs) else None
+    pv = segs[k - 1] if k else None
+    dur_b = next((b.get("duracao") for b in CFG["brutos"] if b["id"] == s["bruto"]), None) or 1e9
+    if not (nx and nx["bruto"] == s["bruto"] and abs(nx["a"] - s["b"]) < 0.02) and s["b"] < dur_b - 0.05 and em_som(s["bruto"], s["b"]):
+        EM_SOM.append(dict(onde=round(s["o1"], 2), bruto=s["bruto"], t=s["b"], lado="fim", perto=texto_entre(s["bruto"], s["b"] - 0.6, s["b"] + 0.6)))
+    if not (pv and pv["bruto"] == s["bruto"] and abs(pv["b"] - s["a"]) < 0.02) and s["a"] > 0.05 and em_som(s["bruto"], s["a"]):
+        EM_SOM.append(dict(onde=round(s["o0"], 2), bruto=s["bruto"], t=s["a"], lado="início", perto=texto_entre(s["bruto"], s["a"] - 0.6, s["a"] + 0.6)))
+for c in EM_SOM:
+    print(f"  ⚠️  corte em cima de fala aos {c['onde']:.2f} s do vídeo ({c['lado']}, bruto {c['bruto']} {c['t']:.2f} s, perto de «{c['perto']}»): "
+          f"mova a borda para uma pausa real ou mantenha a palavra", flush=True)
+
+json.dump(dict(frames=fcount, fps=FPS, w=W, h=H, segs=segs, words=words, cortes_em_som=EM_SOM), open(os.path.join(OUT, "timeline.json"), "w"),
           ensure_ascii=False, indent=1)
 dur_bruto = sum(b.get("duracao", 0) for b in CFG["brutos"])
+for aj in AJUSTES:
+    print(f"  🛡️  {aj}")
 ritmo_final = len(words) / max(fcount / FPS, 0.1)
 print(f"  ritmo depois do corte: {ritmo_final:.2f} palavras/s (alvo 2,8 a 3,2; abaixo arrasta, acima cansa)")
 print(f"  base pronta: {fcount} quadros · {fcount / FPS:.1f} s (bruto {dur_bruto:.1f} s) · {len(words)} palavras · "

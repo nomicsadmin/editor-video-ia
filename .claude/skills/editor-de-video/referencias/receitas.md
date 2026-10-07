@@ -49,12 +49,15 @@ Os números são faixas, não regra fixa: a referência da pessoa manda mais que
 - **Erro que mata:** tela pequena e ilegível no celular. Se não dá para ler, aproxime (`zoom`) ou corte.
 
 ## Para todas
+- **Corte com mão leve.** Sai: frase repetida inteira, pausa, tropeço com pausa dos dois lados. Fica: palavra emendada
+  na fala corrida, mesmo que seja um "tá" ou um "enfim". Cortar ali come meia palavra.
 - **Print sempre recortado no essencial.** Página inteira ou tabela larga fica ilegível no celular. Recorte só o trecho
   que ela cita (`ffmpeg -i print.png -vf "crop=LARGURA:ALTURA:X:Y" print-recorte.png`) e salve em `assets/`. Tabela:
   fique com a coluna dos nomes e a coluna que importa. Texto do print com menos de ~40 px no quadro final não se lê no
   celular: recorte mais ou troque o print por um `card` com o dado (citando a fonte no `projeto.md`).
 - Gancho nos 3 primeiros segundos: a primeira frase dela, sem respiro antes. Se ela enrola no começo, comece na frase forte.
-- Ritmo médio de fala: 2,8 a 3,2 palavras por segundo depois do corte. Abaixo disso, o vídeo arrasta.
+- Ritmo médio de fala: 2,8 a 3,2 palavras por segundo depois do corte. Chega lá cortando pausa, não acelerando a voz
+  (acelerar só se a pessoa pedir).
 - Duração: o que o conteúdo pede. Corte repetição, não ideia.
 - Som: voz limpa e nivelada antes de qualquer efeito. Efeito sonoro só na entrada de elemento, baixinho.
 - Música (se ela mandar): entra baixa e abaixa sozinha quando ela fala (`edicao.trilha`).

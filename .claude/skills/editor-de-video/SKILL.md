@@ -26,7 +26,10 @@ se faltar algo, `bash scripts/setup.sh` (explique em uma frase o que ele instala
 ## Regras que valem sempre
 
 1. **Plano aprovado antes de cortar.** Nada de `base.py` sem o "pode" da pessoa.
-2. **Nunca cortar dentro de palavra.** O `base.py` acha a borda no silêncio real do áudio. Leia os ⚠️ que ele imprime.
+2. **Nunca comer palavra.** Corte só em pausa real. O `base.py` mede a pausa no volume e nos agudos (o "s" final é
+   baixo em volume), empurra a borda para a pausa mais próxima e descarta `skip` em fala emendada (🛡️ no terminal).
+   Termina com ⚠️ "corte em cima de fala"? Mova a borda ou mantenha a palavra. **Melhor sobrar uma hesitação do que
+   comer meia palavra.** Não acelere a fala (`speed`/`ritmo`) sem a pessoa pedir.
 3. **Tudo que entra na tela entra na palavra em que é dito** (`"quando": "palavra#n"`), nunca num segundo chutado.
    Tela que não ilustra a frase daquele momento é enfeite: tire.
 4. **Uma ideia por tela.** O assunto mudou, a tela muda. Fundo vazio por mais de ~1 s é tela morta.
@@ -76,6 +79,8 @@ Sem referência: mostre as receitas de `receitas.md` (uma frase cada) e recomend
 Termine com uma pergunta só. **Não corte antes do ok.**
 
 ### 6 · Cortar
+Corte com mão leve. Tire: frases inteiras que ela repetiu ou errou, pausas, e tropeços que tenham pausa dos dois lados.
+Não tire palavra solta do meio de fala corrida ("referentes a", "tá", "pô" emendados na frase): o motor vai devolver.
 Escreva `edl.json`. Rode `.venv/bin/python motor/base.py edicoes/<pasta>` e leia os ⚠️.
 Confira só o áudio (10 s): `.venv/bin/python motor/checar_voz.py edicoes/<pasta>`. Sumiu palavra? Ajuste o trecho.
 Erro de transcrição que vai se repetir (nome do produto dela): `motor/glossario.json`. Só deste vídeo: `fix` no edl.
