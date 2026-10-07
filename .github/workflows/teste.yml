@@ -1,0 +1,45 @@
+# Teste automático: instala do zero e edita o vídeo de exemplo num Windows e num Mac limpos, a cada mudança.
+name: Teste do editor
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  editar-exemplo:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-14]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    env:
+      EDITOR_MODELO: tiny   # modelo pequeno do transcritor, só para o teste ser rápido
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+      - name: ffmpeg (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ffmpeg -y --no-progress
+      - name: transcritor reserva (Mac sem GPU no robô de teste)
+        if: runner.os == 'macOS'
+        run: echo "o setup instala o MLX; se o robô não tiver GPU, o transcritor cai no faster-whisper" && python -m venv .venv && .venv/bin/python -m pip install -q faster-whisper
+      - name: Setup (o mesmo que a pessoa roda)
+        run: bash scripts/setup.sh
+      - name: Conferência
+        run: |
+          test -s edicoes/exemplo/exemplo-editado.mp4
+          grep "QA:" edicoes/exemplo/teste.log
+          grep -q "0 corte(s) em cima de fala" edicoes/exemplo/teste.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: exemplo-${{ matrix.os }}
+          path: |
+            edicoes/exemplo/exemplo-editado.mp4
+            edicoes/exemplo/teste.log
+            edicoes/exemplo/qa/relatorio.md

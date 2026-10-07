@@ -5,7 +5,7 @@ Lê um vídeo de referência e mede o que dá para medir, para o Claude olhar ju
   - folha de contato (1 quadro por segundo) e um quadro logo depois de cada corte
   - quantas palavras por segundo a pessoa fala (se tiver fala)
 
-Uso:  .venv/bin/python motor/referencia.py <arquivo-ou-link> <pasta-de-saida>
+Uso:  <python do projeto> motor/referencia.py <arquivo-ou-link> <pasta-de-saida>
 Link (Instagram, TikTok, YouTube): baixa sozinho. Se o site pedir login, usa o login do navegador da pessoa
 neste computador (nada sai da máquina). Na primeira vez o Mac pode pedir a senha do Chaveiro: é normal.
 Saída: <pasta>/ficha.json, <pasta>/folha.jpg, <pasta>/cortes.jpg
@@ -26,18 +26,17 @@ def baixar(link):
     """Baixa o vídeo do link. Tenta sem login; se o site pedir (Instagram quase sempre pede), usa sozinho o login
     do navegador da própria pessoa, só neste computador: Chrome primeiro, depois Firefox. O Chrome aberto trava o
     banco de cookies, então lê de uma cópia temporária que é apagada logo depois."""
-    if not shutil.which("yt-dlp"):
-        subprocess.run(["brew", "install", "yt-dlp"], capture_output=True)
-    if not shutil.which("yt-dlp"):
-        sys.exit("Falta o yt-dlp (rode: brew install yt-dlp) para ler link. Ou mande o arquivo do vídeo.")
+    YTDLP = [sys.executable, "-m", "yt_dlp"]  # instalado no python do projeto (requirements.txt), Mac e Windows
     alvo = os.path.join(OUT, "referencia.%(ext)s")
     tentativas = [[]]
     chrome = os.path.expanduser("~/Library/Application Support/Google/Chrome")
-    if os.path.exists(os.path.join(chrome, "Default", "Cookies")):
-        tmp = os.path.join(OUT, "_chrome")
-        tentativas.append(("chrome", tmp))
-    if os.path.isdir(os.path.expanduser("~/Library/Application Support/Firefox")):
-        tentativas.append(["--cookies-from-browser", "firefox"])
+    if sys.platform == "darwin":
+        if os.path.exists(os.path.join(chrome, "Default", "Cookies")):
+            tentativas.append(("chrome", os.path.join(OUT, "_chrome")))
+        if os.path.isdir(os.path.expanduser("~/Library/Application Support/Firefox")):
+            tentativas.append(["--cookies-from-browser", "firefox"])
+    else:  # Windows: o Firefox funciona sempre; Chrome e Edge às vezes protegem o login e o yt-dlp não consegue ler
+        tentativas += [["--cookies-from-browser", n] for n in ("firefox", "chrome", "edge")]
     for t in tentativas:
         extra = t
         if isinstance(t, tuple):
@@ -45,7 +44,7 @@ def baixar(link):
             shutil.copy(os.path.join(chrome, "Default", "Cookies"), os.path.join(t[1], "Default", "Cookies"))
             shutil.copy(os.path.join(chrome, "Local State"), os.path.join(t[1], "Local State"))
             extra = ["--cookies-from-browser", f"chrome:{t[1]}"]
-        r = subprocess.run(["yt-dlp", "-q", "--no-warnings", *extra, "-f", "mp4/best", "-o", alvo, link], capture_output=True, text=True)
+        r = subprocess.run([*YTDLP, "-q", "--no-warnings", *extra, "-f", "mp4/best", "-o", alvo, link], capture_output=True, text=True)
         if isinstance(t, tuple):
             shutil.rmtree(t[1], ignore_errors=True)
         achados = [f for f in os.listdir(OUT) if f.startswith("referencia.") and not f.endswith(".part")]
@@ -77,8 +76,8 @@ if cortes:
                     "-frames:v", "1", "-fps_mode", "vfr", "-q:v", "4", os.path.join(OUT, "cortes.jpg")])
 
 fala = None
-py = os.path.join(RAIZ, ".venv", "bin", "python")
-if os.path.exists(py):
+py = sys.executable
+if True:
     base = os.path.join(OUT, "fala")
     subprocess.run([py, os.path.join(M, "transcrever.py"), ent, base], capture_output=True, env={**os.environ, "EDITOR_IDIOMA": "auto"})
     if os.path.exists(base + ".json"):

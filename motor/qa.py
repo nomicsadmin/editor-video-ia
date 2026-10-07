@@ -76,7 +76,7 @@ if cortes:
 linhas += ["## Imagem", "", f"- Folha de contato: `qa/folha-final.jpg`", f"- Quadro logo depois de cada corte ({len(cortes)}): `qa/cortes.jpg`", ""]
 
 # 3 · retranscrição do final
-venv = os.path.join(RAIZ, ".venv", "bin", "python")
+venv = sys.executable
 base_tr = os.path.join(Q, "final-transcricao")
 subprocess.run([venv, os.path.join(M, "transcrever.py"), SAIDA, base_tr], capture_output=True)
 esperado = [w["w"] for w in tl["words"] if not w.get("bip")]

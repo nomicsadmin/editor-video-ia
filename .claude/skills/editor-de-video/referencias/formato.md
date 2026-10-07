@@ -103,6 +103,10 @@ Tempos em segundos **do bruto** (leia no `leitura.md`). A ordem dos trechos é a
 
 ## cenas.json (o que entra na tela)
 
+**Âncora boa é frase curta e única** (`"a Google volte"`, `"Eu confesso"`), não contagem de palavra comum (`"a#7"`):
+quando o corte devolve ou tira uma palavra, a contagem muda e a tela pula para outro lugar do vídeo. Use `#n` só em
+palavra rara (nome de produto, número).
+
 `quando` e `ate`: segundos do vídeo final **ou** a fala: `"Claude#2"` (a segunda vez que ela diz Claude),
 `"os três erros"` (sequência de palavras), `"assin*"` (prefixo). A cena sai quando a palavra do `ate` **começa**;
 `ate_fim` sai quando ela termina; sem os dois, fica `dur` segundos (padrão 2,6). `y` = altura do topo da cena (0 a 1).

@@ -2,9 +2,9 @@
 """
 Transcrição local, palavra a palavra, sem mandar o áudio para nenhum servidor.
   Mac com chip Apple (M1 em diante): MLX Whisper (rápido, usa a GPU).
-  Mac Intel: faster-whisper (mais devagar, mesmo resultado).
+  Windows e Mac Intel: faster-whisper (usa a placa de vídeo NVIDIA se tiver; senão o processador, mais devagar).
 
-Uso:  .venv/bin/python motor/transcrever.py <video-ou-audio> <saida_base>
+Uso:  <python do projeto> motor/transcrever.py <video-ou-audio> <saida_base>
 Gera <saida_base>.json (segmentos + palavras com tempo), .txt e .srt.
 """
 import json
@@ -13,8 +13,8 @@ import subprocess
 import sys
 import tempfile
 
-MODELO_MLX = "mlx-community/whisper-large-v3-turbo"
-MODELO_FW = "large-v3"
+MODELO_MLX = "mlx-community/whisper-" + os.environ.get("EDITOR_MODELO", "large-v3-turbo")  # EDITOR_MODELO=tiny no teste automático
+MODELO_FW = os.environ.get("EDITOR_MODELO", "large-v3-turbo")
 IDIOMA = os.environ.get("EDITOR_IDIOMA", "pt")
 IDIOMA = None if IDIOMA == "auto" else IDIOMA  # "auto" = descobre a língua (referência gringa)
 
@@ -41,7 +41,10 @@ def com_mlx(audio):
 
 def com_faster_whisper(audio):
     from faster_whisper import WhisperModel
-    m = WhisperModel(MODELO_FW, device="cpu", compute_type="int8")
+    try:  # placa de vídeo NVIDIA, se houver; senão o processador
+        m = WhisperModel(MODELO_FW, device="cuda", compute_type="float16")
+    except Exception:
+        m = WhisperModel(MODELO_FW, device="cpu", compute_type="int8")
     segs, _ = m.transcribe(audio, language=IDIOMA, word_timestamps=True, condition_on_previous_text=False)
     out = {"text": "", "segments": []}
     for s in segs:
@@ -56,7 +59,7 @@ def main():
     audio = extrair_audio(entrada)
     try:
         r = com_mlx(audio)
-    except ImportError:
+    except Exception:  # sem chip Apple, ou Mac sem acesso à GPU: faster-whisper
         r = com_faster_whisper(audio)
     json.dump(r, open(base + ".json", "w"), ensure_ascii=False, indent=1)
     open(base + ".txt", "w").write(r["text"].strip() + "\n")

@@ -22,7 +22,7 @@ def norm(w):
 
 
 base = os.path.join(B, "voz-check")
-subprocess.run([os.path.join(RAIZ, ".venv/bin/python"), os.path.join(M, "transcrever.py"),
+subprocess.run([sys.executable, os.path.join(M, "transcrever.py"),
                 os.path.join(B, "voz.wav"), base], check=True, capture_output=True)
 ouv = [w["word"].strip() for s in json.load(open(base + ".json"))["segments"] for w in s.get("words", [])]
 ouv = [fix.get(re.sub(r"[.,!?…]+$", "", w), w) for w in ouv]

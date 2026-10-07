@@ -17,7 +17,8 @@ Leia antes de editar (todos nesta pasta):
 3. `referencias/referencia.md` · como ler a referência que a pessoa mandou
 4. Sob demanda: `referencias/efeitos-extras.md` (efeito que as telas prontas não fazem)
 
-Tudo roda na pasta do projeto (a raiz deste repositório). `base.py`, `render.mjs` inteiro e `montar.sh` podem levar
+Tudo roda na pasta do projeto (a raiz deste repositório). `$PY` = o Python do projeto: `.venv/bin/python` no Mac,
+`.venv/Scripts/python.exe` no Windows (Git Bash). `base.py`, `render.mjs` inteiro e `montar.sh` podem levar
 vários minutos com bruto grande (60 fps, 300 MB): rode em segundo plano e espere terminar antes de seguir. Primeira vez? Rode `bash scripts/diagnostico.sh`;
 se faltar algo, `bash scripts/setup.sh` (explique em uma frase o que ele instala e peça permissão).
 
@@ -62,13 +63,13 @@ Crie a pasta `edicoes/<AAAA-MM-DD>-<slug>/` e o `projeto.json` (molde em `format
 - Tem prints, fotos ou logo que você quer na tela? Mande agora (vão para `assets/` do projeto).
 
 ### 3 · Ler o material
-`.venv/bin/python motor/preparar.py edicoes/<pasta>`
+`$PY motor/preparar.py edicoes/<pasta>`
 Mede, transcreve (cache), acha o rosto e escreve `leitura.md` + `qa/bruto-<id>.jpg`. Leia o `leitura.md` inteiro
 e olhe a folha. Conte para a pessoa, em 3 a 5 linhas: duração, ritmo da fala, onde ela se repetiu, tropeços, o que
 dá para tirar, e se o áudio tem ruído.
 
 ### 4 · Ler a referência (se houver)
-`.venv/bin/python motor/referencia.py <arquivo-ou-link> edicoes/<pasta>/referencia`
+`$PY motor/referencia.py <arquivo-ou-link> edicoes/<pasta>/referencia`
 Link do Instagram, TikTok ou YouTube baixa sozinho (se o site pedir login, o script usa o login do navegador da
 pessoa neste computador; não pergunte nem explique, a não ser que falhe). Olhe `folha.jpg` e `cortes.jpg`. Monte a ficha em linguagem simples (como em `referencia.md`) e escolha a receita
 mais próxima. Copie o **jeito** (ritmo, legenda, layout, cor), nunca a marca, o rosto ou o texto do outro.
@@ -81,8 +82,8 @@ Termine com uma pergunta só. **Não corte antes do ok.**
 ### 6 · Cortar
 Corte com mão leve. Tire: frases inteiras que ela repetiu ou errou, pausas, e tropeços que tenham pausa dos dois lados.
 Não tire palavra solta do meio de fala corrida ("referentes a", "tá", "pô" emendados na frase): o motor vai devolver.
-Escreva `edl.json`. Rode `.venv/bin/python motor/base.py edicoes/<pasta>` e leia os ⚠️.
-Confira só o áudio (10 s): `.venv/bin/python motor/checar_voz.py edicoes/<pasta>`. Sumiu palavra? Ajuste o trecho.
+Escreva `edl.json`. Rode `$PY motor/base.py edicoes/<pasta>` e leia os ⚠️.
+Confira só o áudio (10 s): `$PY motor/checar_voz.py edicoes/<pasta>`. Sumiu palavra? Ajuste o trecho.
 Erro de transcrição que vai se repetir (nome do produto dela): `motor/glossario.json`. Só deste vídeo: `fix` no edl.
 
 ### 7 · Telas
@@ -96,7 +97,7 @@ Leia `qa/relatorio.md`. Problema? Corrija e rode de novo antes de mostrar.
 Só mexeu em tela ou legenda? `node motor/render.mjs edicoes/<pasta> && bash motor/montar.sh edicoes/<pasta> --so-mix`.
 
 ### 9 · Entregar
-Abra o vídeo para a pessoa (`open "edicoes/<pasta>/<saida>.mp4"`) e diga em 3 a 5 linhas: duração, o que saiu,
+Abra o vídeo para a pessoa (Mac: `open "edicoes/<pasta>/<saida>.mp4"`; Windows: `cmd //c start "" "edicoes\<pasta>\<saida>.mp4"`) e diga em 3 a 5 linhas: duração, o que saiu,
 o que entrou na tela, e 2 ou 3 coisas que ela pode pedir para mudar. Escreva `edicoes/<pasta>/projeto.md` com as
 decisões e cada rodada.
 

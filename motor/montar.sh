@@ -5,11 +5,11 @@
 # A saída sai em <projeto>/<saida>.mp4 (campo `saida` do projeto.json; padrão: nome da pasta).
 set -euo pipefail
 M="$(cd "$(dirname "$0")" && pwd)"
-PY="$M/../.venv/bin/python"
+PY="$M/../.venv/bin/python"; [ -x "$PY" ] || PY="$M/../.venv/Scripts/python.exe"  # Mac · Windows (Git Bash)
 P="$(cd "$1" && pwd)"
 B="$P/_build"
-SAIDA=$(python3 -c "import json,os,sys; c=json.load(open('$P/projeto.json')); print(c.get('saida') or os.path.basename('$P'))")
-TRILHA=$(python3 -c "import json; c=json.load(open('$P/projeto.json')); print((c.get('edicao') or {}).get('trilha') or '')")
+SAIDA=$("$PY" -c "import json,os,sys; c=json.load(open('$P/projeto.json')); print(c.get('saida') or os.path.basename('$P'))")
+TRILHA=$("$PY" -c "import json; c=json.load(open('$P/projeto.json')); print((c.get('edicao') or {}).get('trilha') or '')")
 
 if [ "${2:-}" != "--so-mix" ]; then
   # projeto novo (ou bruto trocado): mede e transcreve antes de cortar
@@ -31,7 +31,7 @@ else
     -map "[m]" -ac 2 "$B/mix.wav"
 fi
 J=$(ffmpeg -hide_banner -nostats -i "$B/mix.wav" -af loudnorm=I=-14:TP=-1.0:LRA=11:print_format=json -f null - 2>&1 | sed -n '/^{/,/^}/p')
-m() { echo "$J" | python3 -c "import json,sys; print(json.load(sys.stdin)['$1'])"; }
+m() { echo "$J" | "$PY" -c "import json,sys; print(json.load(sys.stdin)['$1'])"; }
 if [ "$(m input_i)" = "-inf" ]; then  # sem som nenhum: não há o que nivelar
   ffmpeg -y -v error -i "$B/video.mp4" -i "$B/mix.wav" -map 0:v -map 1:a -c:v copy -ar 48000 -c:a aac -b:a 256k -movflags +faststart -shortest "$P/$SAIDA.mp4"
 else

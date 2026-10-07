@@ -4,14 +4,16 @@
 ### Manda o vídeo, o briefing e a referência. Recebe o reels editado.
 
 Corte pela fala, legenda palavra a palavra, telas que entram na palavra certa e som pronto pro Instagram.<br>
-**Tudo no seu computador. Sem pagar por minuto. Sem saber editar.**
+**Tudo no seu computador, Mac ou Windows. Sem pagar por minuto. Sem saber editar.**
 
+
+<img alt="O mesmo trecho: à esquerda o vídeo bruto do celular, à direita editado pela skill" src="docs/img/antes-depois.gif" width="600">
 
 [**Começar com IA (sem saber editar)**](#-comece-em-3-passos-com-a-ia) · [**Passo a passo completo**](docs/README.md) · [**Ver as receitas**](#-as-receitas)
 
-<sub>Open-source AI video editor for Claude Code · cuts on speech, word-by-word captions, scenes anchored to what you say · runs locally on macOS</sub>
+<sub>Open-source AI video editor for Claude Code · cuts on speech, word-by-word captions, scenes anchored to what you say · runs locally on macOS and Windows</sub>
 
-![Claude Code](https://img.shields.io/badge/Claude%20Code-skill-D97757) ![macOS](https://img.shields.io/badge/macOS-Apple%20Silicon%20e%20Intel-000?logo=apple) ![ffmpeg](https://img.shields.io/badge/ffmpeg-render-007808?logo=ffmpeg) ![Whisper local](https://img.shields.io/badge/transcrição-local-6E6F76) ![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue)
+![Claude Code](https://img.shields.io/badge/Claude%20Code-skill-D97757) ![macOS](https://img.shields.io/badge/macOS-Apple%20Silicon%20e%20Intel-000?logo=apple) ![Windows](https://img.shields.io/badge/Windows-10%20e%2011-0078D4?logo=windows) ![ffmpeg](https://img.shields.io/badge/ffmpeg-render-007808?logo=ffmpeg) ![Whisper local](https://img.shields.io/badge/transcrição-local-6E6F76) ![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue)
 
 </div>
 
@@ -21,9 +23,9 @@ Corte pela fala, legenda palavra a palavra, telas que entram na palavra certa e 
 
 | | | |
 |---|---|---|
-| ✂️ **Corte que não come palavra**<br>Pausa, tropeço e repetição saem. A borda do corte cai no silêncio de verdade. | 💬 **Legenda palavra a palavra**<br>No tempo exato da fala, abaixo do queixo, longe da interface do Instagram. | 🎯 **Telas na palavra certa**<br>Print, número, card e logo entram quando você diz, não num segundo chutado. |
+| ✂️ **Corte que não come palavra**<br>Pausa, tropeço e repetição saem. O corte só cai em pausa de verdade, medida no áudio. | 💬 **Legenda palavra a palavra**<br>No tempo exato da fala, abaixo do queixo, longe da interface do Instagram. | 🎯 **Telas na palavra certa**<br>Print, número, card e logo entram quando você diz, não num segundo chutado. |
 | 📱 **Tela dividida com rosto grande**<br>O assunto em cima, você embaixo, sem ficar minúsculo no celular. | 🔊 **Som pronto pro Instagram**<br>Voz limpa e nivelada, efeito discreto nas entradas, volume no padrão das redes. | 🔍 **Conferência antes de te mostrar**<br>A IA reouve o vídeo final e corrige sílaba comida e tela vazia. |
-| 🎬 **Copia o jeito da sua referência**<br>Manda o link: ela mede o ritmo, a legenda e o layout e segue. | 🔁 **Ajuste em português**<br>"Legenda mais pra cima", "tira esse pedaço". Mexe só no que você pediu. | 🔒 **Nada sai do seu computador**<br>Transcrição e render rodam no seu Mac. Sem chave de API. |
+| 🎬 **Copia o jeito da sua referência**<br>Manda o link: ela mede o ritmo, a legenda e o layout e segue. | 🔁 **Ajuste em português**<br>"Legenda mais pra cima", "tira esse pedaço". Mexe só no que você pediu. | 🔒 **Nada sai do seu computador**<br>Transcrição e render rodam na sua máquina. Sem chave de API. |
 
 ## 🔁 Você só manda 3 coisas
 
@@ -39,13 +41,13 @@ Corte pela fala, legenda palavra a palavra, telas que entram na palavra certa e 
 **Não precisa saber editar nem programar.** A IA conduz o mesmo processo que usamos para editar os nossos vídeos: lê a sua fala, mostra o plano, só corta depois do seu "pode" e confere tudo antes de te mostrar.
 
 **1. Baixe o projeto e abra no Claude Code**
-Clique em **Code > Download ZIP**, descompacte e abra a pasta no app [Claude Code](https://claude.com/claude-code). Precisa de um plano do Claude que inclua o Claude Code.
+Clique em **Code > Download ZIP**, descompacte e abra a pasta no app [Claude Code](https://claude.com/claude-code). Precisa de um plano do Claude que inclua o Claude Code. Funciona em **Mac** e em **Windows 10/11** (no Windows, o Claude Code já usa o Git Bash, que é onde o editor roda).
 
 **2. Cole esta frase na IA**
 ```text
 Leia o COMECE-AQUI.md e prepare o meu editor de vídeo.
 ```
-Ela confere o seu Mac, instala o que faltar (pedindo permissão) e edita um vídeo de teste.
+Ela confere o seu computador, instala o que faltar (pedindo permissão) e edita um vídeo de teste.
 
 **3. Mande o seu vídeo**
 ```text
@@ -56,6 +58,20 @@ Referência: [link de um reels que você gosta]
 Pronto. Ela lê a fala, lê a referência, te mostra o plano e entrega o vídeo editado.
 
 > 💡 Quanto custa? O editor é grátis. Você só usa o seu plano do Claude. [Veja o que precisa](docs/02-pre-requisitos.md).
+
+---
+
+## 👀 Veja por dentro
+
+O vídeo inteiro editado, acelerado (1min33 em 20 s):
+
+<img alt="Edição completa acelerada: capa, prints, frases em destaque e chamada final" src="docs/img/edicao-completa.gif" width="300">
+
+As telas que entraram, cada uma na palavra em que foi dita:
+
+<img alt="Seis telas do vídeo editado: capa, frase em destaque, tabela, logos, frase e chamada final" src="docs/img/telas.jpg" width="100%">
+
+<sub>Vídeo de exemplo: reels do Vinicius Parizotto (Grupo Nomics), bruto gravado no carro, editado do zero pela skill a partir de um pedido em português e de uma referência do Instagram.</sub>
 
 ---
 
@@ -84,14 +100,14 @@ O diagnóstico (`bash scripts/diagnostico.sh`) confere tudo e diz o que falta, s
 
 ## 🔒 No seu computador
 
-- O vídeo, a transcrição e o render ficam no seu Mac. Nada é enviado para servidor de ninguém.
+- O vídeo, a transcrição e o render ficam no seu computador. Nada é enviado para servidor de ninguém.
 - A transcrição usa o Whisper rodando na sua máquina. Sem chave de API, sem cobrança por minuto.
-- Para ler um link do Instagram, a IA usa o login do seu próprio navegador, só no seu computador, só para baixar a referência.
+- Para ler um link do Instagram, a IA usa o login do seu próprio navegador, só no seu computador, só para baixar a referência. No Windows, o Firefox é o mais garantido (Chrome e Edge às vezes protegem o login).
 - As pastas `meus-videos/`, `minhas-referencias/`, `minha-marca/` e `edicoes/` nunca vão para o GitHub (estão no `.gitignore`).
 
 ## ✋ O que ele não faz (ainda)
 
-Roda em Mac (Windows está nos planos). Não publica nada por você. Não inventa número, print nem depoimento: se não está na sua fala ou na sua pasta, não entra. Efeito especial fora das telas prontas: a IA monta sob medida ou usa o catálogo aberto do [HyperFrames](https://github.com/heygen-com/hyperframes), [quando você pedir](docs/07-efeitos-extras.md).
+Não publica nada por você. Não inventa número, print nem depoimento: se não está na sua fala ou na sua pasta, não entra. Efeito especial fora das telas prontas: a IA monta sob medida ou usa o catálogo aberto do [HyperFrames](https://github.com/heygen-com/hyperframes), [quando você pedir](docs/07-efeitos-extras.md).
 
 ---
 

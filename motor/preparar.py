@@ -11,7 +11,7 @@ e escreve <projeto>/leitura.md: a transcrição em frases com [início-fim], que
 em pausas ≥ 0,5 s, que é o que o modelo lê para decidir os cortes (o modelo
 lê isso para decidir os cortes).
 
-Uso:  python3 preparar.py <pasta-do-projeto>
+Uso:  .venv/bin/python motor/preparar.py <pasta-do-projeto>   (Windows: .venv/Scripts/python)
 """
 import json
 import os
@@ -21,7 +21,7 @@ import sys
 import tempfile
 
 RAIZ = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
-VENV_PY = os.path.join(RAIZ, ".venv", "bin", "python")
+VENV_PY = sys.executable  # o python do projeto (.venv), em Mac ou Windows
 TRANSCREVER = os.path.join(RAIZ, "motor", "transcrever.py")
 PAUSA = 0.5
 
@@ -68,18 +68,20 @@ def palavras(tr):
 
 def rosto(arq, dur):
     """Mediana da caixa do rosto (Vision, local) em quadros a cada ~8 s. None se não houver rosto."""
-    binario = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_bin", "rosto")
-    if not os.path.exists(binario):
+    # Mac: Vision da Apple (mais preciso). Windows, ou Mac sem as ferramentas da Apple: OpenCV (rosto.py).
+    aqui = os.path.dirname(os.path.abspath(__file__))
+    binario = os.path.join(aqui, "_bin", "rosto")
+    if sys.platform == "darwin" and not os.path.exists(binario) and shutil.which("swiftc"):
         os.makedirs(os.path.dirname(binario), exist_ok=True)
-        subprocess.run(["swiftc", "-O", os.path.join(os.path.dirname(os.path.abspath(__file__)), "rosto.swift"), "-o", binario],
-                       check=True, capture_output=True)
+        subprocess.run(["swiftc", "-O", os.path.join(aqui, "rosto.swift"), "-o", binario], capture_output=True)
+    comando = [binario] if os.path.exists(binario) else [sys.executable, os.path.join(aqui, "rosto.py")]
     tmp = tempfile.mkdtemp(prefix="rosto-")
     try:
         passo = max(2.0, dur / 14)
         subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", arq, "-vf",
                         f"fps=1/{passo:.2f},scale=540:960:force_original_aspect_ratio=increase,crop=540:960", "-q:v", "3",
                         os.path.join(tmp, "%03d.jpg")], check=True)
-        d = json.loads(subprocess.run([binario, tmp], capture_output=True, text=True, check=True).stdout)
+        d = json.loads(subprocess.run([*comando, tmp], capture_output=True, text=True, check=True).stdout)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
     if d["com_rosto"] < max(2, d["quadros"] // 3):

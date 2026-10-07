@@ -1,3 +1,5 @@
 numpy>=2.0
+yt-dlp>=2025.9
 mlx-whisper>=0.4 ; platform_machine == "arm64" and sys_platform == "darwin"
-faster-whisper>=1.1 ; platform_machine != "arm64"
+faster-whisper>=1.1 ; platform_machine != "arm64" or sys_platform != "darwin"
+opencv-python-headless>=4.10,<5 ; sys_platform != "darwin"

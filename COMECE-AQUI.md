@@ -26,8 +26,9 @@ pronto (`motor/`). O seu trabalho é instalar, entender o que ela quer e editar 
 ### Etapa 1 · Instalar (uma vez)
 1. Rode `bash scripts/diagnostico.sh`. Tudo ✅? Pule para a etapa 2.
 2. Faltou algo: explique em uma frase ("vou instalar o ffmpeg, que corta o vídeo, e o transcritor, que escuta a sua fala
-   aqui no seu Mac") e, com o "pode", rode `bash scripts/setup.sh`. Ele usa o Homebrew e pode pedir a senha do Mac
-   (quem digita é ela, no terminal).
+   aqui no seu computador") e, com o "pode", rode `bash scripts/setup.sh`. No Mac ele usa o Homebrew e pode pedir a senha
+   do Mac (quem digita é ela, no terminal). No Windows usa o winget; se algo acabou de ser instalado e o diagnóstico ainda
+   não enxerga, peça para ela fechar e abrir o Claude Code e rode de novo.
 3. Se pedir as ferramentas da Apple (janela "Instalar"), oriente o clique e rode o setup de novo.
 4. Rode o diagnóstico de novo até ficar tudo ✅.
 
