@@ -17,7 +17,8 @@ Leia antes de editar (todos nesta pasta):
 3. `referencias/referencia.md` · como ler a referência que a pessoa mandou
 4. Sob demanda: `referencias/efeitos-extras.md` (efeito que as telas prontas não fazem)
 
-Tudo roda na pasta do projeto (a raiz deste repositório). Primeira vez? Rode `bash scripts/diagnostico.sh`;
+Tudo roda na pasta do projeto (a raiz deste repositório). `base.py`, `render.mjs` inteiro e `montar.sh` podem levar
+vários minutos com bruto grande (60 fps, 300 MB): rode em segundo plano e espere terminar antes de seguir. Primeira vez? Rode `bash scripts/diagnostico.sh`;
 se faltar algo, `bash scripts/setup.sh` (explique em uma frase o que ele instala e peça permissão).
 
 ---

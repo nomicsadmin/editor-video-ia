@@ -214,7 +214,7 @@ const DESENHA = {
     const { a, ent } = vis(c, t); if (a <= 0) return; const escuro = c.escuro ?? false;
     x.save(); x.globalAlpha = a; const X = W * 0.08, Y = H * (c.y ?? 0.1) + (1 - ent) * 30;
     if (c.rotulo) rotulo(c.rotulo, X, Y, escuro ? 'rgba(255,255,255,0.6)' : C.suave, 26);
-    titulo(c.texto || '', c.destaque, X, Y + (c.rotulo ? 40 : 0) + (c.tamanho || 84) * 0.9, { tam: c.tamanho || 84, maxW: W * 0.84, t, t0: c.t0 + 0.1, cor: escuro ? C.branco : C.tinta, cdest: corDe(c.cor || ED.cor) });
+    titulo(c.texto || '', c.destaque, X, Y + (c.rotulo ? 40 : 0) + (c.tamanho || 84) * 0.9, { tam: c.tamanho || 84, maxW: W * 0.84, t, t0: c.capa ? -1 : c.t0 + 0.1, cor: escuro ? C.branco : C.tinta, cdest: corDe(c.cor || ED.cor) });
     x.restore();
   },
   card(c, t) {
@@ -229,7 +229,7 @@ const DESENHA = {
     x.save(); rr(X, Y, cw, ch, 30); x.clip(); x.fillStyle = corDe(c.cor || ED.cor); x.fillRect(X, Y, 12, ch); x.restore();
     let cy = Y + pad;
     if (c.rotulo) { rotulo(c.rotulo, X + pad + 12, cy + 22); cy += 46; }
-    titulo(c.titulo || '', c.destaque, X + pad + 12, cy + tam * 0.82, { tam, maxW, t, t0: c.t0 + 0.12, cdest: corDe(c.cor || ED.cor) });
+    titulo(c.titulo || '', c.destaque, X + pad + 12, cy + tam * 0.82, { tam, maxW, t, t0: c.capa ? -1 : c.t0 + 0.12, cdest: corDe(c.cor || ED.cor) });
     if (c.sub) { x.font = `${PESO.texto} 34px "${F.texto}"`; x.fillStyle = C.suave; x.fillText(c.sub, X + pad + 12, Y + ch - pad + 4); }
     if (c.logoBmp) x.drawImage(c.logoBmp, X + cw - pad - 96, Y + pad - 6, 96, 96);
     x.restore();
@@ -518,7 +518,8 @@ window.__qa = () => {
   const desconhecidas = CENAS.filter(c => !DESENHA[c.tipo]).map(c => `${c.tipo}@${c.t0.toFixed(1)} (tipo que o motor não desenha: só aparece se o extra.js desenhar)`);
   const D = ED.divisao || 0.48; const usaSplit = LAYS.some(l => l.layout === 'split') || SEGS.some(s => s.layout === 'split');
   const invadeRosto = usaSplit ? CENAS.filter(c => c.tipo === 'imagem' && (c.modo || 'card') === 'card' && (c.y ?? 0.12) + (c.altura_max || 0.42) > D + 0.005).map(c => `imagem@${c.t0.toFixed(1)}: y ${c.y ?? 0.12} + altura_max ${c.altura_max || 0.42} passa da divisão ${D} (se estiver no split, invade o rosto)`) : [];
-  return { invade_rosto_no_split: invadeRosto, cenas_na_altura_da_legenda: naLegenda, legenda: { estilo: ED.legenda, y: Y_LEG, y_split: +Y_SPLIT.toFixed(3), motivo: Y_MOTIVO }, duracao_s: +(TL.frames / FPS).toFixed(2), pedacos: SEGS.length, palavras: words.length, paginas_legenda: paginas.length, cenas: CENAS.map(c => `${c.tipo} ${c.t0.toFixed(2)}–${c.t1.toFixed(2)}`), legenda_reduzida: estouro, cenas_sobrepostas: sobrepostas, tipos_desconhecidos: desconhecidas, avisos };
+  const fimAntes = CENAS.filter(c => c.t1 <= c.t0 + 0.05).map(c => `${c.tipo}@${c.t0.toFixed(1)}: termina antes de começar (o "ate" achou uma palavra anterior; lembre que a âncora ignora acento: "aí" = "AI", "é" = "e")`);
+  return { termina_antes_de_comecar: fimAntes, invade_rosto_no_split: invadeRosto, cenas_na_altura_da_legenda: naLegenda, legenda: { estilo: ED.legenda, y: Y_LEG, y_split: +Y_SPLIT.toFixed(3), motivo: Y_MOTIVO }, duracao_s: +(TL.frames / FPS).toFixed(2), pedacos: SEGS.length, palavras: words.length, paginas_legenda: paginas.length, cenas: CENAS.map(c => `${c.tipo} ${c.t0.toFixed(2)}–${c.t1.toFixed(2)}`), legenda_reduzida: estouro, cenas_sobrepostas: sobrepostas, tipos_desconhecidos: desconhecidas, avisos };
 };
 window.__cenas = () => CENAS.map(c => ({ tipo: c.tipo, t0: +c.t0.toFixed(3), t1: +c.t1.toFixed(3), n: (c.logos || c.itens || [1]).length, passo: c.passo || 0.25, fundo: c.fundo || null })).concat(LAYS.map((l, i) => ({ tipo: 'layout', t0: +l.t0.toFixed(3), t1: +l.t0.toFixed(3), de: i ? LAYS[i - 1].layout : null, para: l.layout })));
 window.__ready = true;

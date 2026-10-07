@@ -41,8 +41,9 @@ _build/          gerado: quadros, voz, linha do tempo
 - `legenda`: `palavra` · `marca-texto` · `nenhuma`. Ajuste fino: `"legenda_ajuste": { "tamanho": 96, "y": 0.8 }`.
 - `cor`: cor de destaque das telas: `destaque`, `cor2`, `cor3` (da marca) ou um hex (`"#00A86B"`).
 - `zoom`: os dois enquadramentos que alternam a cada frase. `foco: [x, y]` (0 a 1) força o centro; sem ele, usa o rosto.
-- `divisao`: onde a tela dividida corta (0,47 a 0,5). `zoom_split`: aproximação do rosto no split (1,05 a 1,1).
-  `subir_rosto`: sobe o rosto dentro da metade de baixo (0 a 0,08). `fundo_split`: `claro` ou `escuro`.
+- `divisao`: onde a tela dividida corta (0,47 a 0,5). `zoom_split`: aproximação do rosto no split (1,0 a 1,1; selfie
+  com o rosto já grande, como no carro: 1,0). `subir_rosto`: sobe o rosto dentro da metade de baixo (0 a 0,12).
+  `legenda_split_dy`: desce (+) ou sobe (-) a legenda no split em relação ao queixo (padrão 0,035). `fundo_split`: `claro` ou `escuro`.
 - `escurecer`: sombra no pé do vídeo para a legenda ler (0 a 0,4).
 - `acabamento`: `"cru"` = grão de filme, vinheta e tom quente (receita Conversa crua).
 - `trilha`: música opcional; entra baixa e abaixa sozinha quando a pessoa fala.
@@ -90,6 +91,9 @@ Tempos em segundos **do bruto** (leia no `leitura.md`). A ordem dos trechos é a
 - `gapmax`: pausa interna maior que isso sai (0,25 rápido · 0,45 normal · 0,6 conversa).
 - `ritmo`: velocidade de todos os trechos (1,0 a 1,12). Use quando o `base.py` disser que o ritmo ficou abaixo de 2,8 palavras/s.
 - `skip`: pedaços de TEMPO que saem de dentro do trecho (tropeço, repetição, hesitação escondida em palavra `esticada` no `leitura.md`).
+- Palavra esticada por cima de hesitação engana o `skip` (a palavra certa some junto). Retranscreva só o trecho
+  (`ffmpeg -ss A -to B -i bruto trecho.wav` + `motor/transcrever.py`), corrija o tempo dela em
+  `transcricoes/<id>.palavras.json` (guarde o original) e rode o `base.py` de novo. O `checar_voz.py` mostra se sumiu algo.
 - `speed`: acelera sem mudar o tom da voz (1,1 a 1,2 em fala longa; 2 a 6 em tela sem fala).
 - `fala: false`: trecho sem áudio (gravação de tela). `enquadrar`: `cobrir` (preenche) ou `conter` (cabe inteiro).
 - `layout`: `cheio` · `split` · `claro` · `escuro` (ou troque pela fala, no `cenas.json`).
@@ -102,7 +106,7 @@ Tempos em segundos **do bruto** (leia no `leitura.md`). A ordem dos trechos é a
 `quando` e `ate`: segundos do vídeo final **ou** a fala: `"Claude#2"` (a segunda vez que ela diz Claude),
 `"os três erros"` (sequência de palavras), `"assin*"` (prefixo). A cena sai quando a palavra do `ate` **começa**;
 `ate_fim` sai quando ela termina; sem os dois, fica `dur` segundos (padrão 2,6). `y` = altura do topo da cena (0 a 1).
-Para contar o `#n`, procure a palavra no `leitura.md`; errou a conta, o `render.mjs --qa` avisa "âncora não achada".
+Para contar o `#n`, procure a palavra no `leitura.md` **ignorando acento e maiúscula** ("aí" conta igual a "AI", "é" igual a "e"); errou a conta, o `render.mjs --qa` avisa "âncora não achada".
 Cena com `quando: 0` aparece já inteira no primeiro quadro (é a capa do reels). Cena que termina a menos de 0,6 s do fim
 fica até o último quadro, sozinha.
 

@@ -51,7 +51,8 @@ Os números são faixas, não regra fixa: a referência da pessoa manda mais que
 ## Para todas
 - **Print sempre recortado no essencial.** Página inteira ou tabela larga fica ilegível no celular. Recorte só o trecho
   que ela cita (`ffmpeg -i print.png -vf "crop=LARGURA:ALTURA:X:Y" print-recorte.png`) e salve em `assets/`. Tabela:
-  fique com a coluna dos nomes e a coluna que importa.
+  fique com a coluna dos nomes e a coluna que importa. Texto do print com menos de ~40 px no quadro final não se lê no
+  celular: recorte mais ou troque o print por um `card` com o dado (citando a fonte no `projeto.md`).
 - Gancho nos 3 primeiros segundos: a primeira frase dela, sem respiro antes. Se ela enrola no começo, comece na frase forte.
 - Ritmo médio de fala: 2,8 a 3,2 palavras por segundo depois do corte. Abaixo disso, o vídeo arrasta.
 - Duração: o que o conteúdo pede. Corte repetição, não ideia.
