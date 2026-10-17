@@ -10,7 +10,7 @@ import * as FX from './fisico.js';
 let B, T, K, F;
 const usa = (b, c) => { B = b; ({ T, K, F } = b.usa(c)); };
 
-const PW = 1000, PH = 430, NW = 200, NH = 86;
+const PW = 1000, PH = 430, NW = 480, NH = 206;   // 17/Out: grade da queima 2,4× mais fina (a de 200×86 aparecia em degraus)
 // clipes por faixa: [início, fim] em fração da área de clipes (desenho nosso, não é dado)
 const FAIXAS = [
   { nome: 'V2', cor: 'faixa_video2', clipes: [[0.02, 0.17], [0.26, 0.44], [0.62, 0.71], [0.83, 0.97]] },
@@ -25,13 +25,32 @@ function preparar(c) {
   c._ordem = new Float32Array(NW * NH);
   for (let j = 0; j < NH; j++) for (let i = 0; i < NW; i++) {
     const u = i / (NW - 1), v = j / (NH - 1), d = Math.hypot((u - 0.82) * 1.0, (v - 1.05) * 0.55);
-    c._ordem[j * NW + i] = 0.55 * nz(u * 5.2, v * 2.6, 4) + 0.62 * d;
+    c._ordem[j * NW + i] = 0.55 * nz(u * 5.2, v * 2.6, 4) + 0.1 * nz(u * 26, v * 12, 3) + 0.62 * d;   // + detalhe fino: borda orgânica, não serrilhada
   }
   let mn = Infinity, mx = -Infinity; for (const o of c._ordem) { mn = Math.min(mn, o); mx = Math.max(mx, o); }
   for (let k = 0; k < c._ordem.length; k++) c._ordem[k] = (c._ordem[k] - mn) / (mx - mn);
   c._nz = FX.ruido(77);
   c._mask = new OffscreenCanvas(NW, NH); c._char = new OffscreenCanvas(NW, NH); c._glow = new OffscreenCanvas(NW, NH);
   c._pc = new OffscreenCanvas(PW, PH);
+  // focos de fogo: células da grade com a hora em que pegam fogo (relativa à ignição). A queima é p = 1,12·u² com
+  // u = (t − tq)/queima_s (power1.in), então a célula de ordem o acende em queima_s·√(o/1,12). Sem estado: cada
+  // quadro sabe sozinho quais partículas estão vivas, e o seek pode ir para qualquer quadro.
+  const qs = c.queima_s ?? 1.15, r = FX.ruido(53);
+  c._focos = [];
+  for (let j = 5; j < NH; j += 11) for (let i = 5; i < NW; i += 11) {
+    const o = c._ordem[j * NW + i]; if (o > 1.12) continue;
+    c._focos.push({ u: i / (NW - 1), v: j / (NH - 1), ti: qs * Math.sqrt(o / 1.12), h: r(i * 0.31, j * 0.47, 2), s: j * NW + i });
+  }
+  // sprites de fogo (bolha macia em 4 temperaturas: núcleo branco-amarelo → laranja → vermelho → brasa escura)
+  c._spr = [];
+}
+
+// bolha macia de uma cor (sprite reaproveitado pelas partículas; 'lighter' soma as camadas como luz)
+function sprite(cor, rgba) {
+  const n = 64, cv = new OffscreenCanvas(n, n), g = cv.getContext('2d');
+  const gr = g.createRadialGradient(n / 2, n / 2, 0, n / 2, n / 2, n / 2);
+  gr.addColorStop(0, rgba(cor, 1)); gr.addColorStop(0.35, rgba(cor, 0.55)); gr.addColorStop(0.7, rgba(cor, 0.14)); gr.addColorStop(1, rgba(cor, 0));
+  g.fillStyle = gr; g.fillRect(0, 0, n, n); return cv;
 }
 
 function timeline(c, b) {
@@ -140,8 +159,8 @@ async function desenhar({ g: x, c, t, V, mask }, b) {
   if (p > 0) {
     queima(c, p);
     pc.imageSmoothingEnabled = true; pc.imageSmoothingQuality = 'high';
-    pc.globalCompositeOperation = 'source-atop'; pc.drawImage(c._char, 0, 0, PW, PH);
-    pc.globalCompositeOperation = 'destination-in'; pc.drawImage(c._mask, 0, 0, PW, PH);
+    pc.globalCompositeOperation = 'source-atop'; pc.filter = 'blur(2.5px)'; pc.drawImage(c._char, 0, 0, PW, PH);
+    pc.globalCompositeOperation = 'destination-in'; pc.filter = 'blur(1.2px)'; pc.drawImage(c._mask, 0, 0, PW, PH); pc.filter = 'none';
     pc.globalCompositeOperation = 'lighter'; pc.filter = 'blur(6px)'; pc.drawImage(c._glow, 0, 0, PW, PH); pc.drawImage(c._glow, 0, 0, PW, PH); pc.filter = 'blur(1.5px)'; pc.drawImage(c._glow, 0, 0, PW, PH); pc.filter = 'none';
     pc.globalCompositeOperation = 'source-over';
   }
@@ -178,9 +197,13 @@ async function desenhar({ g: x, c, t, V, mask }, b) {
       G.fillStyle = sg; G.fillRect(o[0] - rad * 1.2, o[1] - up - rad * 1.2, rad * 2.4, rad * 2.4);
     }
     G.restore();
-    // pontos da frente de queima
+    // línguas de fogo na frente de queima (as do efeito aprovado), na grade fina e com a posição sorteada pelo ruído:
+    // sem fileiras alinhadas. Cada uma tremula no tempo.
     const pts = [];
-    if (p < 1.1) for (let j = 2; j < NH; j += 6) for (let i = 2; i < NW; i += 6) { const d = c._ordem[j * NW + i] - p; if (d > -0.05 && d < 0.012) pts.push([i / (NW - 1), j / (NH - 1), (i >> 1) * 7 + (j >> 1)]); }
+    if (p < 1.1) for (let j = 4; j < NH; j += 13) for (let i = 4; i < NW; i += 13) {
+      const s = j * NW + i, ii = Math.min(NW - 1, Math.max(0, i + Math.round((nz(s * 0.17, 1.1, 1) - 0.5) * 12))), jj = Math.min(NH - 1, Math.max(0, j + Math.round((nz(s * 0.29, 2.3, 1) - 0.5) * 12)));
+      const d = c._ordem[jj * NW + ii] - p; if (d > -0.05 && d < 0.012) pts.push([ii / (NW - 1), jj / (NH - 1), (ii >> 1) * 7 + (jj >> 1)]);
+    }
     G.save(); G.globalCompositeOperation = 'lighter';
     const chama = (bx, by, w, h, sway, alfa) => {
       const gr = G.createLinearGradient(0, by, 0, by - h);
@@ -190,11 +213,13 @@ async function desenhar({ g: x, c, t, V, mask }, b) {
       G.bezierCurveTo(bx + sway * 0.4 + w * 0.25, by - h * 0.7, bx + w * 0.7, by - h * 0.35, bx + w / 2, by); G.closePath(); G.fill();
     };
     pts.forEach(([u, v, s]) => {
-      const o = map(u, v), fl = nz(s * 0.37, tt * 3.2, 3), alt = (95 + 200 * fl) * V.k * (0.4 + 0.6 * forca), larg = (34 + 30 * nz(s, 1.3, 2)) * V.k;
+      const o = map(u, v), fl = nz(s * 0.37, tt * 3.2, 3), alt = (95 + 200 * fl) * V.k * (0.4 + 0.6 * forca), larg = (30 + 30 * nz(s, 1.3, 2)) * V.k;
       const sway = (nz(s * 0.11, tt * 2.1, 2) - 0.5) * 60 * V.k;
-      G.filter = 'blur(10px)'; chama(o[0], o[1] + 6, larg * 2.2, alt * 1.25, sway, 0.35 * forca);
-      G.filter = 'none'; chama(o[0], o[1] + 4, larg, alt, sway, 0.7 * forca);
+      G.filter = 'blur(10px)'; chama(o[0], o[1] + 6, larg * 2.2, alt * 1.25, sway, 0.32 * forca);
+      G.filter = 'blur(1.5px)'; chama(o[0], o[1] + 4, larg, alt, sway, 0.62 * forca);
     });
+    G.filter = 'none';
+    G.globalAlpha = 1;
     // fagulhas: nascem da frente de queima e sobem rodopiando
     for (let i = 0; i < 90; i++) {
       const nasce = c._tq + 0.05 + (i / 90) * (c._qs + 0.4), a = t - nasce, vida = 0.7 + 0.9 * nz(i, 9.1, 1); if (a <= 0 || a > vida) continue;
