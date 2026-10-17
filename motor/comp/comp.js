@@ -8,6 +8,8 @@
 //   /marca/marca.json  opcional: cores, fontes e logo da pessoa (pasta minha-marca/)
 //   /comp/legendas.json estilos de legenda
 // Ordem de desenho: fundo do layout → vídeo → cenas → frente (extra) → LEGENDA POR ÚLTIMO.
+import efeitosNomics from './efeitos.js';
+import { PADRAO as TEMA_NOMICS, mescla } from './efeitos/base.js';
 const cv = document.getElementById('c'); const x = cv.getContext('2d');
 const falha = m => { window.__erro = m; throw new Error(m); };
 const getJ = async (u, opcional = false) => { const r = await fetch(u); if (!r.ok) { if (opcional) return null; falha('faltou ' + u); } return r.json(); };
@@ -492,11 +494,34 @@ function cru(n) {
 }
 
 // ---------------------------------------------------------------- quadro
+// ---------------------------------------------------------------- efeitos nativos da Nomics (motor/comp/efeitos/)
+// Os mesmos módulos do editor da Nomics, sem alteração: o orquestrador prepara cada cena (tempo, cabeça, sons) e
+// desenha na camada dele, depois do vídeo e antes das telas. Hoje: timeline_chamas (a timeline de edição em chamas).
+// A pessoa fica na frente do fogo com a máscara do motor/mascaras.py (só no Mac, com o Vision); sem ela, o efeito
+// sai igual, só que por cima de tudo.
+const idxEm = t => { const s = segEm(t); return s.f0 + Math.min(s.n - 1, Math.floor((t - s.o0) * FPS + 1e-6)); };
+let ultMask = null, ultMaskIdx = -1, temMascara = null;
+async function mascaraDe(idx) {
+  if (temMascara === false) return null;
+  if (idx === ultMaskIdx) return ultMask;
+  const r = await fetch(`/b/m/${String(idx).padStart(5, '0')}.png`);
+  if (!r.ok) { if (temMascara === null) temMascara = false; return null; }
+  temMascara = true; const b = await createImageBitmap(await r.blob());
+  if (ultMask) ultMask.close(); ultMask = b; ultMaskIdx = idx; return b;
+}
+const EF = efeitosNomics({
+  x, W, H, FPS, clamp, ancora, idxEm, avisos, getJ, quadro, mascaraDe, vid: () => VID,
+  // tema: o da Nomics, com a cor de destaque e a fonte de rótulo da pessoa
+  MARCA: mescla(TEMA_NOMICS, { cores: { destaque: C.destaque }, fontes: { mono: F.rotulo }, pesos: { mono: Number(PESO.rotulo) || 500 } }),
+});
+for (const c of CENAS) if (EF.TIPOS.has(c.tipo)) await EF.preparar(c);
+
 async function desenha(n) {
   const t = n / FPS; const s = segEm(t);
   x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
   VID = null; const lay = await fundoELayout(t, s);
   if (ED.acabamento === 'cru') cru(n);
+  await EF.camadas(t);
   if (EXTRA.fundo) EXTRA.fundo(t, s, lay);
   for (const c of CENAS) {
     if (t < c.t0 - 0.01 || t > (c.t2 != null ? c.t2 + 0.3 : c.t1) + 0.01) continue;
@@ -515,11 +540,11 @@ window.__qa = () => {
   const sobrepostas = []; const cs = [...CENAS].sort((a, b) => a.t0 - b.t0);
   for (let i = 1; i < cs.length; i++) if (cs[i].t0 < cs[i - 1].t1 - 0.3 && (cs[i].y ?? 0.15) === (cs[i - 1].y ?? 0.15)) sobrepostas.push(`${cs[i - 1].tipo}@${cs[i - 1].t0.toFixed(1)} × ${cs[i].tipo}@${cs[i].t0.toFixed(1)}`);
   const naLegenda = CENAS.filter(c => ['numero', 'frase', 'card', 'selo', 'logo', 'logos'].includes(c.tipo) && c.y != null && Math.abs(c.y - Y_LEG) < 0.07).map(c => `${c.tipo}@${c.t0.toFixed(1)} (y ${c.y}) encosta na legenda (y ${Y_LEG})`);
-  const desconhecidas = CENAS.filter(c => !DESENHA[c.tipo]).map(c => `${c.tipo}@${c.t0.toFixed(1)} (tipo que o motor não desenha: só aparece se o extra.js desenhar)`);
+  const desconhecidas = CENAS.filter(c => !DESENHA[c.tipo] && !EF.TIPOS.has(c.tipo)).map(c => `${c.tipo}@${c.t0.toFixed(1)} (tipo que o motor não desenha: só aparece se o extra.js desenhar)`);
   const D = ED.divisao || 0.48; const usaSplit = LAYS.some(l => l.layout === 'split') || SEGS.some(s => s.layout === 'split');
   const invadeRosto = usaSplit ? CENAS.filter(c => c.tipo === 'imagem' && (c.modo || 'card') === 'card' && (c.y ?? 0.12) + (c.altura_max || 0.42) > D + 0.005).map(c => `imagem@${c.t0.toFixed(1)}: y ${c.y ?? 0.12} + altura_max ${c.altura_max || 0.42} passa da divisão ${D} (se estiver no split, invade o rosto)`) : [];
   const fimAntes = CENAS.filter(c => c.t1 <= c.t0 + 0.05).map(c => `${c.tipo}@${c.t0.toFixed(1)}: termina antes de começar (o "ate" achou uma palavra anterior; lembre que a âncora ignora acento: "aí" = "AI", "é" = "e")`);
   return { termina_antes_de_comecar: fimAntes, invade_rosto_no_split: invadeRosto, cenas_na_altura_da_legenda: naLegenda, legenda: { estilo: ED.legenda, y: Y_LEG, y_split: +Y_SPLIT.toFixed(3), motivo: Y_MOTIVO }, duracao_s: +(TL.frames / FPS).toFixed(2), pedacos: SEGS.length, palavras: words.length, paginas_legenda: paginas.length, cenas: CENAS.map(c => `${c.tipo} ${c.t0.toFixed(2)}–${c.t1.toFixed(2)}`), legenda_reduzida: estouro, cenas_sobrepostas: sobrepostas, tipos_desconhecidos: desconhecidas, avisos };
 };
-window.__cenas = () => CENAS.map(c => ({ tipo: c.tipo, t0: +c.t0.toFixed(3), t1: +c.t1.toFixed(3), n: (c.logos || c.itens || [1]).length, passo: c.passo || 0.25, fundo: c.fundo || null })).concat(LAYS.map((l, i) => ({ tipo: 'layout', t0: +l.t0.toFixed(3), t1: +l.t0.toFixed(3), de: i ? LAYS[i - 1].layout : null, para: l.layout })));
+window.__cenas = () => CENAS.map(c => ({ tipo: c.tipo, t0: +c.t0.toFixed(3), t1: +c.t1.toFixed(3), sons: c._sons || null, n: (c.logos || c.itens || [1]).length, passo: c.passo || 0.25, fundo: c.fundo || null })).concat(LAYS.map((l, i) => ({ tipo: 'layout', t0: +l.t0.toFixed(3), t1: +l.t0.toFixed(3), de: i ? LAYS[i - 1].layout : null, para: l.layout })));
 window.__ready = true;

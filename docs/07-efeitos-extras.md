@@ -1,5 +1,11 @@
 # Efeitos extras (opcional)
 
+## 0 · Efeitos prontos
+- **Timeline em chamas** (`timeline_chamas`): o efeito do editor da Nomics. Uma timeline de edição aparece no ar acima
+  da sua cabeça, se monta sozinha e pega fogo na palavra que você escolher. Pede assim: "No começo, coloca a timeline
+  em chamas e ela pega fogo quando eu falo [palavra]." Grave com espaço livre na parede acima da cabeça. No Mac você
+  fica na frente do fogo (o editor recorta a pessoa); no Windows o fogo fica por cima.
+
 As telas prontas do motor cobrem a maior parte dos vídeos. Quando a pessoa pede algo que elas não fazem
 (transição de vidro quebrando, gráfico subindo animado, texto com efeito especial), há dois caminhos.
 

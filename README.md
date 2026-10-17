@@ -107,7 +107,7 @@ O diagnóstico (`bash scripts/diagnostico.sh`) confere tudo e diz o que falta, s
 
 ## ✋ O que ele não faz (ainda)
 
-Não publica nada por você. Não inventa número, print nem depoimento: se não está na sua fala ou na sua pasta, não entra. Efeito especial fora das telas prontas: a IA monta sob medida ou usa o catálogo aberto do [HyperFrames](https://github.com/heygen-com/hyperframes), [quando você pedir](docs/07-efeitos-extras.md).
+Não publica nada por você. Não inventa número, print nem depoimento: se não está na sua fala ou na sua pasta, não entra. Efeito pronto: a timeline em chamas, o mesmo efeito do editor da Nomics ("a timeline pega fogo quando eu falar X"). Efeito especial fora das telas prontas: a IA monta sob medida ou usa o catálogo aberto do [HyperFrames](https://github.com/heygen-com/hyperframes), [quando você pedir](docs/07-efeitos-extras.md).
 
 ---
 

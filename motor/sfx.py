@@ -5,6 +5,8 @@ Regra: o efeito acompanha a ENTRADA DE ELEMENTO, não o corte seco.
   - whoosh curto na troca de layout (rosto ↔ fundo ↔ tela dividida)
   - pop em card, logo, número, selo, imagem em card
   - tique leve em cada item de lista
+  - efeitos nativos (timeline_chamas): a lista de sons que o próprio efeito pede (whoosh, tique, riser, impacto,
+    whoosh-cinematic), sintetizados aqui
 Uso:  python3 sfx.py <pasta-do-projeto>  → _build/sfx.wav
 """
 import _utf8  # noqa: F401 (Windows em UTF-8)
@@ -48,6 +50,32 @@ def whoosh(d=0.34):
     return x * np.sin(np.pi * p) ** 1.5 * 0.35
 
 
+def riser(d=0.6):
+    """Subida de ruído filtrado (a tensão antes da ignição)."""
+    n = rng.standard_normal(int(d * SR))
+    p = np.linspace(0, 1, len(n))
+    out = np.zeros_like(n)
+    for k, (a, b) in enumerate(zip(np.linspace(0, 1, 9)[:-1], np.linspace(0, 1, 9)[1:])):
+        i0, i1 = int(a * len(n)), int(b * len(n))
+        F = np.fft.rfft(n[i0:i1]); fr = np.fft.rfftfreq(i1 - i0, 1 / SR)
+        F *= np.exp(-((fr - (500 + 3500 * a)) / (700 + 1500 * a)) ** 2)
+        out[i0:i1] = np.fft.irfft(F, i1 - i0)
+    out /= np.abs(out).max() + 1e-9
+    return out * p ** 2 * 0.45
+
+
+def impacto(d=0.7):
+    """Pancada grave (seno que cai de 110 para 40 Hz) com um estalo de ruído no ataque."""
+    t = np.arange(int(d * SR)) / SR
+    f = 40 + 70 * np.exp(-t * 9)
+    corpo = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 5.5)
+    estalo = rng.standard_normal(len(t)) * np.exp(-t * 60) * 0.35
+    return (corpo + estalo) * 0.7
+
+
+SONS = {"whoosh": lambda: whoosh(0.34), "tique": tique, "pop": pop, "riser": riser, "impacto": impacto,
+        "whoosh-cinematic": lambda: whoosh(0.75) * 1.2}
+
 out = np.zeros(int(dur * SR) + SR)
 
 
@@ -64,7 +92,11 @@ for a, b in zip(segs, segs[1:]):
         trocas += 1
 POP = {"card", "logo", "numero", "selo", "imagem", "comparativo", "citacao"}
 for c in cenas:
-    if c["tipo"] in POP:
+    if c.get("sons"):   # efeito nativo: toca os sons que ele mesmo pediu
+        for s in c["sons"]:
+            if s.get("som") in SONS:
+                put(s["t"], SONS[s["som"]](), 0.5 * s.get("ganho", 1))
+    elif c["tipo"] in POP:
         put(c["t0"] - 0.02, pop(), 0.45)
     elif c["tipo"] == "logos":
         for i in range(c.get("n", 1)):

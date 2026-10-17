@@ -150,6 +150,12 @@ fica até o último quadro, sozinha.
 - `lista` com `"destaque": "fala"` acende o item dito, um a cada `passo` segundos.
 - `citacao`: `origem` padrão `x`; página de site: `"origem": "blog.google"` + `logo`. `fica_ate`: o card recua e
   fica atrás do próximo até essa palavra.
+- `timeline_chamas` (efeito nativo da Nomics, o mesmo do editor da casa): uma timeline de edição (faixas, régua,
+  agulha, timecode) se desdobra em 3D acima da cabeça, monta clipe a clipe e pega fogo na palavra `queima_em`: brasa,
+  fagulhas, fumaça e a luz do fogo na sala, com som de whoosh, riser e impacto. `{ "tipo": "timeline_chamas",
+  "quando": "edição", "queima_em": "acaba", "titulo": "Edição · reels", "queima_s": 1.15, "largura": 0.86 }`.
+  No Mac, o montar.sh recorta a pessoa (Vision) e ela fica na frente do fogo; no Windows o efeito sai por cima.
+  Precisa de ~25% de parede livre acima da cabeça.
 - `enfase`: palavra da legenda maior e em outra cor (use em 3 a 5 palavras no vídeo todo, não mais).
 - Logos prontos (`motor/logos/`): openai, claude, anthropic, gemini, google, deepseek, meta, grok, xai, perplexity,
   cursor, github, notion, figma, n8n, midjourney, runway, kling, elevenlabs, lovable, vercel, v0, manus, mistral,

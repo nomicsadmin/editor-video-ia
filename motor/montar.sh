@@ -17,6 +17,11 @@ if [ "${2:-}" != "--so-mix" ]; then
   # projeto novo (ou bruto trocado): mede e transcreve antes de cortar
   if ! ls "$P"/transcricoes/*.palavras.json >/dev/null 2>&1; then "$PY" "$M/preparar.py" "$P"; fi
   "$PY" "$M/base.py" "$P"
+  # efeito nativo com a pessoa na frente (timeline_chamas): recorte da pessoa com o Vision, só no Mac
+  if grep -q '"timeline_chamas"' "$P/cenas.json" 2>/dev/null; then
+    if [ "$(uname)" = "Darwin" ] && command -v swiftc >/dev/null 2>&1; then "$PY" "$M/mascaras.py" "$P"
+    else echo "  aviso: sem o recorte da pessoa (só no Mac); o efeito sai por cima de tudo"; fi
+  fi
   node "$M/render.mjs" "$P"
 fi
 "$PY" "$M/sfx.py" "$P"
