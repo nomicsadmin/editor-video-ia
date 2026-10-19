@@ -1,5 +1,5 @@
 {
-  "_leia": "Estilos de legenda. Tamanhos em px para 1080×1920. `y` = linha de base em fração da altura (desce sozinha para baixo do queixo). A legenda é desenhada por último, por cima de tudo. Ajuste fino por vídeo: `edicao.legenda_ajuste` no projeto.json. Sem legenda: `\"legenda\": \"nenhuma\"`.",
+  "_leia": "Estilos de legenda. Tamanhos em px para 1080×1920. `y` = linha de base em fração da altura (desce sozinha para baixo do queixo). A legenda é desenhada por último, por cima de tudo. Ajuste fino por vídeo: `edicao.legenda_ajuste` no projeto.json. Sem legenda: `\"legenda\": \"nenhuma\"`. Padrão da casa (17/Out/2026): a palavra entra subindo de leve (`sobe`, fração do tamanho, em `sobe_s` segundos), sempre branca; a ênfase (`enfase` no cenas.json) muda só o tamanho. Para voltar a palavra parada: `\"legenda_ajuste\": { \"sobe\": 0 }`; ênfase colorida: `\"cor_enfase\": \"destaque\"`.",
   "palavra": {
     "nome": "Uma palavra por vez",
     "modo": "palavra",
@@ -9,7 +9,9 @@
     "tracking": -0.02,
     "y": 0.78,
     "cor": "#FFFFFF",
-    "cor_enfase": "creme",
+    "cor_enfase": "branco",
+    "sobe": 0.12,
+    "sobe_s": 0.14,
     "contorno": 0,
     "sombra": { "cor": "rgba(0,0,0,0.55)", "blur": 26, "dy": 6 },
     "pop_ms": 50,

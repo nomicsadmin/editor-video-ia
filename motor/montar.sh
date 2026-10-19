@@ -17,10 +17,11 @@ if [ "${2:-}" != "--so-mix" ]; then
   # projeto novo (ou bruto trocado): mede e transcreve antes de cortar
   if ! ls "$P"/transcricoes/*.palavras.json >/dev/null 2>&1; then "$PY" "$M/preparar.py" "$P"; fi
   "$PY" "$M/base.py" "$P"
-  # efeito nativo com a pessoa na frente (timeline_chamas): recorte da pessoa com o Vision, só no Mac
-  if grep -q '"timeline_chamas"' "$P/cenas.json" 2>/dev/null; then
+  # efeitos prontos com a pessoa na frente (timeline_chamas, tela_assunto, checklist, holofote, hodometro): recorte da
+  # pessoa com o Vision da Apple, só no Mac. No Windows cada efeito tem a sua queda limpa (sai por cima, ou numa janela).
+  if grep -qE '"(timeline_chamas|tela_assunto|checklist|holofote|hodometro)"' "$P/cenas.json" 2>/dev/null; then
     if [ "$(uname)" = "Darwin" ] && command -v swiftc >/dev/null 2>&1; then "$PY" "$M/mascaras.py" "$P"
-    else echo "  aviso: sem o recorte da pessoa (só no Mac); o efeito sai por cima de tudo"; fi
+    else echo "  aviso: sem o recorte da pessoa (só no Mac); os efeitos saem por cima, sem quebrar"; fi
   fi
   node "$M/render.mjs" "$P"
 fi

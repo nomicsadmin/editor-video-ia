@@ -198,12 +198,13 @@ def proteger_bordas(i, S):
         return
     bid = S["bruto"]
     dur = next((b.get("duracao") for b in CFG["brutos"] if b["id"] == bid), None) or 1e9
-    if S["a"] > 0.05 and em_som_perto(bid, S["a"]):
+    # "exato_a"/"exato_b": borda que a IA já mediu no volume (pausa curta entre frases de fala corrida): não anda
+    if S["a"] > 0.05 and not S.get("exato_a") and em_som_perto(bid, S["a"]):
         v = vale(bid, S["a"], -1)
         if v is not None:
             AJUSTES.append(f"trecho {i + 1}: início {S['a']:.2f} → {v:.2f} (fala colada; ficou «{texto_entre(bid, v, S['a'])}»)")
             S["a"] = round(v, 3)
-    if S["b"] < dur - 0.05 and em_som_perto(bid, S["b"]):
+    if S["b"] < dur - 0.05 and not S.get("exato_b") and em_som_perto(bid, S["b"]):
         v = vale(bid, S["b"], +1)
         if v is None and dur - S["b"] < 0.8:  # fala emendada até o fim do arquivo: vai até o fim, não come o final
             v = dur
@@ -278,6 +279,7 @@ def extrair(bid, a, b, speed, nframes, enquadrar, fala=True):
 # ---------------------------------------------------------------- trechos → pedaços sem pausa
 GAP = EDL.get("gapmax", 0.5)
 ULTIMO = {}
+ULTIMO_A = {}  # início pedido do último trecho de cada bruto
 RITMO = EDL.get("ritmo", 1.0)
 segs, words = [], []
 I_ZOOM = -1
@@ -340,14 +342,14 @@ for i, S in enumerate(EDL["trechos"]):
     if fala:  # última proteção: borda de pedaço em cima de fala anda para a pausa real, para o lado que MANTÉM som
         prot = []
         usadas = {id(w) for _, _, pw0 in spans for w in pw0}
-        for sa, sb, pw in spans:
-            if sb < (dur_bruto or 1e9) - 0.05 and em_som_perto(bid, sb):
+        for k_, (sa, sb, pw) in enumerate(spans):
+            if sb < (dur_bruto or 1e9) - 0.05 and not (S.get("exato_b") and k_ == len(spans) - 1) and em_som_perto(bid, sb):
                 v = vale(bid, sb, +1, alcance=1.2)
                 if v is None and dur_bruto and dur_bruto - sb < 0.8:
                     v = dur_bruto
                 if v is not None:
                     AJUSTES.append(f"trecho {i + 1}: borda {sb:.2f} → {v:.2f} (fala colada; voltou «{texto_entre(bid, sb, v)}»)"); sb = v
-            if sa > 0.05 and em_som_perto(bid, sa):
+            if sa > 0.05 and not (S.get("exato_a") and k_ == 0) and em_som_perto(bid, sa):
                 v = vale(bid, sa, -1, alcance=1.2)
                 if v is not None:
                     AJUSTES.append(f"trecho {i + 1}: borda {sa:.2f} → {v:.2f} (fala colada; voltou «{texto_entre(bid, v, sa)}»)"); sa = v
@@ -356,6 +358,10 @@ for i, S in enumerate(EDL["trechos"]):
             pw = sorted(pw + novas, key=lambda w: w["s"])
             prot.append((sa, sb, pw))
         spans = prot
+    if S.get("exato_a") and spans:  # borda medida: nenhuma folga ou snap volta para antes dela
+        spans[0] = (max(spans[0][0], a), spans[0][1], [w for w in spans[0][2] if w["s"] >= a - 0.05 or w["e"] > a + 0.12])
+    if S.get("exato_b") and spans:
+        spans[-1] = (spans[-1][0], min(spans[-1][1], b), [w for w in spans[-1][2] if w["s"] < b])
     spans = [(max(0.0, sa), min(sb, dur_bruto) if dur_bruto else sb, pw) for sa, sb, pw in spans]  # o 1º corte nunca começa antes do zero
     # pedaços vizinhos não podem dividir o mesmo áudio: a folga do snap de um invadia a do outro e o fim
     # da palavra tocava duas vezes ("então... ão"). Corta no ponto mais silencioso.
@@ -389,9 +395,11 @@ for i, S in enumerate(EDL["trechos"]):
                 if partes: grupos[k].append(w)
             cortados += [(pa, pb, g) for (pa, pb), g in zip(partes, grupos)]
         spans = cortados
-    if ULTIMO.get(bid) is not None and spans and spans[0][0] < ULTIMO[bid]:  # trecho anterior do mesmo bruto
+    # trecho anterior do mesmo bruto (em ordem de tempo): não repete o fim dele. Trecho que volta para ANTES no bruto
+    # (a ordem do vídeo final mudou de propósito) não é tocado.
+    if ULTIMO.get(bid) is not None and spans and spans[0][0] < ULTIMO[bid] and a >= ULTIMO_A.get(bid, -1):
         spans[0] = (ULTIMO[bid], spans[0][1], [w for w in spans[0][2] if w["s"] >= ULTIMO[bid] - 0.15])
-    if spans: ULTIMO[bid] = spans[-1][1]
+    if spans: ULTIMO[bid] = spans[-1][1]; ULTIMO_A[bid] = a
     for k, (sa, sb, pw) in enumerate(spans):
         nfr = max(1, round((sb - sa) / speed * FPS))
         o0 = fcount / FPS

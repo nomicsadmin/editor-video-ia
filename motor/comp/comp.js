@@ -9,6 +9,7 @@
 //   /comp/legendas.json estilos de legenda
 // Ordem de desenho: fundo do layout → vídeo → cenas → frente (extra) → LEGENDA POR ÚLTIMO.
 import efeitosNomics from './efeitos.js';
+import anim from './anim.js';
 import { PADRAO as TEMA_NOMICS, mescla } from './efeitos/base.js';
 const cv = document.getElementById('c'); const x = cv.getContext('2d');
 const falha = m => { window.__erro = m; throw new Error(m); };
@@ -35,7 +36,10 @@ const PESO = { titulo: '600', texto: '500', rotulo: '500' };
 for (const [fam, arq, peso, estilo] of [
   ['Fraunces', 'fraunces-latin-600-normal.woff2', '600'], ['Fraunces', 'fraunces-latin-600-italic.woff2', '600', 'italic'],
   ['Manrope', 'manrope-latin-500-normal.woff2', '500'], ['Manrope', 'manrope-latin-700-normal.woff2', '700'], ['Manrope', 'manrope-latin-800-normal.woff2', '800'],
-  ['JetBrains Mono', 'jetbrains-mono-latin-500-normal.woff2', '500']]) {
+  ['JetBrains Mono', 'jetbrains-mono-latin-500-normal.woff2', '500'],
+  // as fontes dos efeitos prontos (OFL): Instrument Serif (número, palavra em destaque) e Hedvig Letters (texto dos painéis)
+  ['Instrument Serif', 'instrument-serif-400.woff2', '400'], ['Instrument Serif', 'instrument-serif-400-italic.woff2', '400', 'italic'],
+  ['Hedvig Letters Serif', 'hedvig-letters-serif-400.woff2', '400'], ['Hedvig Letters Sans', 'hedvig-letters-sans-400.woff2', '400']]) {
   const f = new FontFace(fam, `url(/fonts/${arq})`, { weight: peso, style: estilo || 'normal' }); await f.load(); document.fonts.add(f);
 }
 const FONTES_MARCA = Object.assign({}, MARCA.fontes || {}, ED.fontes || {});
@@ -114,13 +118,22 @@ for (const c of CN.cenas || []) {
   if (c.logo) cc.logoBmp = await logo(c.logo, c.logo_cor || '#111111');
   if (c.logos) cc.logosBmp = await Promise.all(c.logos.map(n => logo(n, '#111111')));
   if (c.tipo === 'comparativo') for (const lado of ['a', 'b']) if (c[lado] && c[lado].logo) c[lado].bmp = await logo(c[lado].logo, '#111111');
-  if (c.avatar) cc.avBmp = await img('/p/' + c.avatar);
+  const av = c.avatar || (c.tipo === 'comentario' && MARCA.avatar ? 'marca:' + MARCA.avatar : null);   // foto de perfil: do projeto ou de minha-marca/
+  if (av) cc.avBmp = await img(av.startsWith('marca:') ? '/marca/' + av.slice(6) : '/p/' + av);
+  if (c.tipo === 'comentario' && !c.nome && MARCA.nome) cc.nome = MARCA.nome;
+  if (c.tipo === 'lista' && (c.itens || []).some(i => typeof i === 'object')) cc._tis = c.itens.map((i, k) => (typeof i === 'object' && i.quando != null ? ancora(i.quando) : null) ?? (t0 + 0.15 + k * (c.passo || 0.25)));
   if (c.fica_ate != null) cc.t2 = ancora(c.fica_ate);
   CENAS.push(cc);
 }
-// layouts ancorados na fala: [{ "quando": "Claude#1", "layout": "split" }, ...] vencem o layout do trecho do edl
+// print seguido de print: a saída de um é a entrada do outro (sem whoosh de saída no meio)
+for (const c of CENAS) if (c.tipo === 'print') c._emenda = CENAS.some(o => o !== c && o.tipo === 'print' && Math.abs(o.t0 - c.t1) < 0.08);
+// layouts ancorados na fala: [{ "quando": "Claude#1", "layout": "split" }, ...] vencem o layout do trecho do edl;
+// uma cena com "layout" (o print, por padrão "split") vence os dois enquanto dura
 const LAYS = (CN.layouts || []).map(l => ({ t0: ancora(l.quando), layout: l.layout })).filter(l => l.t0 != null).sort((a, b) => a.t0 - b.t0);
-const layoutEm = (t, s) => { let r = null; for (const l of LAYS) { if (l.t0 <= t + 1e-6) r = l; else break; } return r ? r.layout : (s.layout || 'cheio'); };
+const layoutEm = (t, s) => {
+  for (const c of CENAS) if (c.layout && t >= c.t0 && t < c.t1) return c.layout;
+  let r = null; for (const l of LAYS) { if (l.t0 <= t + 1e-6) r = l; else break; } return r ? r.layout : (s.layout || 'cheio');
+};
 const enfase = new Map(); // palavra de ênfase na legenda (maior e em outra cor)
 for (const e of CN.enfase || []) { const t = ancora(e.quando || e); if (t != null) enfase.set(t, e.escala || 1.4); }
 
@@ -311,12 +324,16 @@ const DESENHA = {
   lista(c, t) {
     const { a } = vis(c, t); if (a <= 0) return; const cw = W * (c.largura || 0.88), X = (W - cw) / 2, Y = H * (c.y ?? 0.12), lh = c.altura_item || 112;
     const ch = 60 + (c.titulo ? 76 : 0) + c.itens.length * lh;
+    // item com âncora própria ({ "texto": "Zoom", "quando": "zoom" }): acende na palavra em que é dito
+    const tAc = i => (c._tis && c._tis[i] != null ? c._tis[i] : c.t0 + 0.15 + i * (c.passo || 0.25));
     x.save(); x.globalAlpha = a; sombraCard(); rr(X, Y, cw, ch, 30); x.fillStyle = C.branco; x.fill(); semSombra();
     if (c.titulo) rotulo(c.titulo, X + 52, Y + 76, C.suave, 28);
-    c.itens.forEach((it, i) => {
-      const ti = c.t0 + 0.15 + i * (c.passo || 0.25); const p = eOut(seg(t, ti, ti + 0.3)); if (p <= 0) return;
-      const iy = Y + 40 + (c.titulo ? 76 : 0) + i * lh + lh / 2; const on = c.destaque === i || (c.destaque === 'fala' && t >= ti && (i === c.itens.length - 1 || t < c.t0 + 0.15 + (i + 1) * (c.passo || 0.25)));
-      if (on) { rr(X + 24, iy - lh / 2 + 8, cw - 48, lh - 16, 18); x.fillStyle = rgba(corDe(c.cor || ED.cor), 0.1); x.fill(); }
+    c.itens.forEach((it0, i) => {
+      const it = typeof it0 === 'object' ? it0.texto : it0;
+      const ti = tAc(i); const p0 = eOut(seg(t, ti, ti + 0.3)); if (p0 <= 0 && !c._tis) return;
+      const p = c._tis ? Math.max(p0, 0.3) : p0;   // itens com âncora já aparecem apagados e acendem na palavra (o cartão nunca fica vazio)
+      const iy = Y + 40 + (c.titulo ? 76 : 0) + i * lh + lh / 2; const on = c.destaque === i || (c.destaque === 'fala' && t >= ti && (i === c.itens.length - 1 || t < tAc(i + 1)));
+      if (on && p0 > 0) { rr(X + 24, iy - lh / 2 + 8, cw - 48, lh - 16, 18); x.fillStyle = rgba(corDe(c.cor || ED.cor), 0.1 * p0); x.fill(); }
       x.globalAlpha = a * p; x.beginPath(); x.arc(X + 66, iy, 11, 0, 7); x.fillStyle = on ? corDe(c.cor || ED.cor) : '#C9CAD0'; x.fill();
       x.font = `${on ? 700 : 500} ${on ? 54 : 50}px "${F.texto}"`; x.fillStyle = C.tinta; x.textBaseline = 'middle'; x.fillText(it, X + 100 + (1 - p) * 20, iy + 2); x.globalAlpha = a;
     });
@@ -435,11 +452,14 @@ function textoComSombra(txt, X, Y) {
   if (P.contorno) { x.lineWidth = P.contorno * 2; x.strokeStyle = P.cor_contorno || 'rgba(0,0,0,0.8)'; x.lineJoin = 'round'; x.strokeText(txt, X, Y); }
   x.fillText(txt, X, Y); semSombra();
 }
+// cena que esconde a legenda (antes_depois no lado cru) ou que leva a legenda para outra altura enquanto dura (tela_assunto)
+const semLegenda = t => CENAS.some(c => c.esconde_legenda === true && t >= c.t0 && t < c.t1);
+const yDaCena = t => { const c = CENAS.find(q => typeof q.legenda_y === 'number' && t >= (q.legenda_t0 ?? q.t0) && t < (q.legenda_t1 ?? q.t1)); return c ? c.legenda_y : null; };
 function legenda(t, lay) {
-  if (SEM_LEGENDA) return;
+  if (SEM_LEGENDA || semLegenda(t)) return;
   const p = paginas.find(q => t >= q.t0 && t < q.t1); if (!p) return;
   const noFundo = lay === 'claro'; // sobre fundo claro a legenda vira tinta escura, sem sombra
-  const yBase = lay === 'split' ? Y_SPLIT : Y_LEG;
+  const yBase = yDaCena(t) ?? (lay === 'split' ? Y_SPLIT : Y_LEG);
   x.save(); x.textBaseline = 'alphabetic';
   if (P.modo === 'palavra') {
     const w = p.w[0]; if (w.bip) { x.restore(); return; }
@@ -447,9 +467,12 @@ function legenda(t, lay) {
     x.font = `${P.peso} ${tam}px "${P.familia}"`; x.letterSpacing = `${(P.tracking || 0) * tam}px`;
     const txt = caixa(pont(w.w)); const larg = x.measureText(txt).width;
     const s = larg > P.largura_max ? P.largura_max / larg : 1;
-    x.globalAlpha = P.pop_ms ? clamp((t - p.t0) / (P.pop_ms / 1000)) : 1;
-    x.fillStyle = noFundo ? C.tinta : esc > 1 ? corDe(P.cor_enfase || 'creme') : P.cor;
-    x.translate(W / 2, H * yBase); x.scale(s, s); x.textAlign = 'center';
+    let al = P.pop_ms ? clamp((t - p.t0) / (P.pop_ms / 1000)) : 1, dy = 0;
+    // "sobe" (fração do tamanho): a palavra entra subindo de leve em "sobe_s" segundos (o padrão da casa desde 17/Out)
+    if (P.sobe) { const q = clamp((t - p.t0) / (P.sobe_s || 0.14)), e = 1 - Math.pow(1 - q, 3); dy = (1 - e) * P.sobe * tam; al = Math.min(al, 0.25 + 0.75 * e); }
+    x.globalAlpha = al;
+    x.fillStyle = noFundo ? C.tinta : esc > 1 ? corDe(P.cor_enfase || 'branco') : P.cor;
+    x.translate(W / 2, H * yBase + dy); x.scale(s, s); x.textAlign = 'center';
     if (noFundo) x.fillText(txt, 0, 0); else textoComSombra(txt, 0, 0);
   } else {
     // página: até 2 linhas centralizadas, marca-texto varrendo cada palavra no tempo da fala
@@ -499,6 +522,7 @@ function cru(n) {
 // desenha na camada dele, depois do vídeo e antes das telas. Hoje: timeline_chamas (a timeline de edição em chamas).
 // A pessoa fica na frente do fogo com a máscara do motor/mascaras.py (só no Mac, com o Vision); sem ela, o efeito
 // sai igual, só que por cima de tudo.
+const clareia = (hex, k) => { const h = String(hex).replace('#', ''); if (h.length !== 6) return hex; const n = parseInt(h, 16); return '#' + [n >> 16 & 255, n >> 8 & 255, n & 255].map(v => Math.round(v + (255 - v) * k).toString(16).padStart(2, '0')).join(''); };
 const idxEm = t => { const s = segEm(t); return s.f0 + Math.min(s.n - 1, Math.floor((t - s.o0) * FPS + 1e-6)); };
 let ultMask = null, ultMaskIdx = -1, temMascara = null;
 async function mascaraDe(idx) {
@@ -510,11 +534,24 @@ async function mascaraDe(idx) {
   if (ultMask) ultMask.close(); ultMask = b; ultMaskIdx = idx; return b;
 }
 const EF = efeitosNomics({
-  x, W, H, FPS, clamp, ancora, idxEm, avisos, getJ, quadro, mascaraDe, vid: () => VID,
-  // tema: o da Nomics, com a cor de destaque e a fonte de rótulo da pessoa
-  MARCA: mescla(TEMA_NOMICS, { cores: { destaque: C.destaque }, fontes: { mono: F.rotulo }, pesos: { mono: Number(PESO.rotulo) || 500 } }),
+  x, W, H, FPS, clamp, ancora, idxEm, avisos, getJ, quadro, mascaraDe, vid: () => VID, ED,
+  // tema: o da Nomics com a cor de destaque da pessoa e as fontes livres deste editor. Com marca própria, o texto dos
+  // painéis usa a fonte de título e a de texto dela.
+  MARCA: mescla(TEMA_NOMICS, {
+    cores: { destaque: C.destaque, destaque_claro: clareia(C.destaque, 0.22) },
+    fontes: { titulo: 'Instrument Serif', titulo_italico: true, display: FONTES_MARCA.titulo ? F.titulo : 'Hedvig Letters Serif',
+      corpo: FONTES_MARCA.texto ? F.texto : 'Hedvig Letters Sans', mono: F.rotulo, display_ref: F.texto },
+    pesos: { titulo: 400, display: FONTES_MARCA.titulo ? Number(PESO.titulo) || 400 : 400, corpo: 400, corpo_forte: FONTES_MARCA.texto ? 700 : 500, mono: Number(PESO.rotulo) || 500, display_ref: 800 },
+  }),
 });
 for (const c of CENAS) if (EF.TIPOS.has(c.tipo)) await EF.preparar(c);
+Object.assign(DESENHA, EF.DESENHA);
+// tipografia cinética e logo desenhado no traço (motor/comp/anim.js, GSAP)
+const AN = anim({ x, W, H, C, clamp, corDe, avisos });
+for (const c of CENAS) await AN.preparar(c);
+Object.assign(DESENHA, AN.DESENHA);
+// cena "som": só agenda um efeito sonoro no sfx.py (clique, whoosh, riser, impacto...), nada na tela
+DESENHA.som = () => {};
 
 async function desenha(n) {
   const t = n / FPS; const s = segEm(t);
@@ -546,5 +583,6 @@ window.__qa = () => {
   const fimAntes = CENAS.filter(c => c.t1 <= c.t0 + 0.05).map(c => `${c.tipo}@${c.t0.toFixed(1)}: termina antes de começar (o "ate" achou uma palavra anterior; lembre que a âncora ignora acento: "aí" = "AI", "é" = "e")`);
   return { termina_antes_de_comecar: fimAntes, invade_rosto_no_split: invadeRosto, cenas_na_altura_da_legenda: naLegenda, legenda: { estilo: ED.legenda, y: Y_LEG, y_split: +Y_SPLIT.toFixed(3), motivo: Y_MOTIVO }, duracao_s: +(TL.frames / FPS).toFixed(2), pedacos: SEGS.length, palavras: words.length, paginas_legenda: paginas.length, cenas: CENAS.map(c => `${c.tipo} ${c.t0.toFixed(2)}–${c.t1.toFixed(2)}`), legenda_reduzida: estouro, cenas_sobrepostas: sobrepostas, tipos_desconhecidos: desconhecidas, avisos };
 };
-window.__cenas = () => CENAS.map(c => ({ tipo: c.tipo, t0: +c.t0.toFixed(3), t1: +c.t1.toFixed(3), sons: c._sons || null, n: (c.logos || c.itens || [1]).length, passo: c.passo || 0.25, fundo: c.fundo || null })).concat(LAYS.map((l, i) => ({ tipo: 'layout', t0: +l.t0.toFixed(3), t1: +l.t0.toFixed(3), de: i ? LAYS[i - 1].layout : null, para: l.layout })));
+window.__cenas = () => CENAS.map(c => ({ tipo: c.tipo, t0: +c.t0.toFixed(3), t1: +c.t1.toFixed(3), sons: c._sons || null, n: (c.logos || c.itens || [1]).length, passo: c.passo || 0.25, fundo: c.fundo || null,
+  tis: c._tis ? c._tis.map(v => +v.toFixed(3)) : null, som: c.som || null, som_ganho: c.som_ganho ?? null, som_ponto: c.som_ponto || null })).concat(LAYS.map((l, i) => ({ tipo: 'layout', t0: +l.t0.toFixed(3), t1: +l.t0.toFixed(3), de: i ? LAYS[i - 1].layout : null, para: l.layout })));
 window.__ready = true;

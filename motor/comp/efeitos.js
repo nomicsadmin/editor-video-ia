@@ -1,5 +1,5 @@
-// EFEITOS NATIVOS DA NOMICS · orquestrador · criado do zero pela Nomics em 12/Out/2026.
-// Código 100% da casa (sem nada de terceiros além do GSAP já vendorizado no motor). Doc: referencias/efeitos-nativos.md.
+// EFEITOS NATIVOS DA NOMICS · orquestrador · criado do zero pela Nomics em 12/Out/2026 (o mesmo do editor da casa).
+// Código 100% da casa (sem nada de terceiros além do GSAP já vendorizado no motor). Guia de uso: docs/10-efeitos-prontos.md.
 //
 // Cada efeito é um módulo em ./efeitos/<nome>.js (registro em ./efeitos/index.js); o que eles dividem (tema da marca,
 // vidro, fontes, cantos, âncoras de fala, recorte na parede) está em ./efeitos/base.js. Este arquivo só liga os módulos
@@ -27,7 +27,7 @@ export default function efeitos(api) {
     const m = MOD[c.tipo]; if (!m) return;
     await B.usaGsap();
     if (B.TOPO === null) B.TOPO = (await getJ('/b/m/topo.json', true)) || false;
-    if (!B.TOPO && m.camada !== 'frente') avisos.push(`${c.tipo}: faltou _build/m/topo.json (rode motor/mascaras.py <pasta>)`);
+    if (!B.TOPO && m.mascara && !avisos.some(a => a.startsWith(c.tipo + ': sem o recorte'))) avisos.push(`${c.tipo}: sem o recorte da pessoa (_build/m/topo.json; no Mac rode motor/mascaras.py <pasta>; no Windows é normal e o efeito sai por cima)`);
     c._T = c.marca ? B.mescla(MARCA, c.marca) : MARCA;   // "marca" na cena ajusta só ela
     c._sons = []; c._cab = B.cabeca(c);
     if (m.preparar) m.preparar(c, B);
