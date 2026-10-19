@@ -52,3 +52,6 @@ Diga a ela o atalho para os próximos vídeos:
 ```text
 Edita esse vídeo: [arraste o vídeo]. [Sobre o que é]. Referência: [link ou "a mesma do último"].
 ```
+E conte, em duas linhas, que ela pode pedir efeitos em português ("o número conta quando eu falar 377", "mostra o print e
+marca esse trecho": lista em `docs/10-efeitos-prontos.md`) e salvar um estilo com nome a partir de 1 a 6 referências
+("aprende o estilo desses vídeos e salva como rapido"; depois, "edita no estilo rapido").

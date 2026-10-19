@@ -39,6 +39,9 @@ _build/          gerado: quadros, voz, linha do tempo
 - `brutos`: um ou mais arquivos (ex.: a pessoa gravou em duas partes). `arquivo` aceita caminho do projeto, absoluto ou `~/`.
   O `preparar.py` completa cada um com duração, tamanho, fps e onde está o rosto.
 - `legenda`: `palavra` · `marca-texto` · `nenhuma`. Ajuste fino: `"legenda_ajuste": { "tamanho": 96, "y": 0.8 }`.
+  Padrão de `palavra`: branca, cada palavra entra subindo de leve (`"sobe": 0.12` do tamanho em `"sobe_s": 0.14` s); a
+  ênfase muda só o tamanho. Palavra parada: `"legenda_ajuste": { "sobe": 0 }`; ênfase colorida: `"cor_enfase": "destaque"`.
+- `estilo`: nome de um estilo salvo (`minhas-referencias/estilos/<nome>.json`), gravado pelo `referencia.py --aplicar`.
 - `cor`: cor de destaque das telas: `destaque`, `cor2`, `cor3` (da marca) ou um hex (`"#00A86B"`).
 - `zoom`: os dois enquadramentos que alternam a cada frase. `foco: [x, y]` (0 a 1) força o centro; sem ele, usa o rosto.
 - `divisao`: onde a tela dividida corta (0,47 a 0,5). `zoom_split`: aproximação do rosto no split (1,0 a 1,1; selfie
@@ -46,7 +49,8 @@ _build/          gerado: quadros, voz, linha do tempo
   `legenda_split_dy`: desce (+) ou sobe (-) a legenda no split em relação ao queixo (padrão 0,035). `fundo_split`: `claro` ou `escuro`.
 - `escurecer`: sombra no pé do vídeo para a legenda ler (0 a 0,4).
 - `acabamento`: `"cru"` = grão de filme, vinheta e tom quente (receita Conversa crua).
-- `trilha`: música opcional; entra baixa e abaixa sozinha quando a pessoa fala.
+- `trilha`: música, **só se a pessoa pedir** (o padrão é sem música, com som desenhado). Entra baixa e abaixa sozinha
+  quando a pessoa fala. Só arquivo dela ou com licença livre.
 - `formato`: só para horizontal: `{ "largura": 1920, "altura": 1080 }`. Sem isso, 1080×1920.
 - `paleta` e `fontes`: trocam as da marca só neste vídeo (mesmo formato de `minha-marca/marca.json`).
 
@@ -90,6 +94,8 @@ Tempos em segundos **do bruto** (leia no `leitura.md`). A ordem dos trechos é a
 ```
 - `gapmax`: pausa interna maior que isso sai (0,25 rápido · 0,45 normal · 0,6 conversa).
 - `ritmo`: velocidade de todos os trechos (padrão 1,0). Só mude se a pessoa pedir o vídeo mais rápido (até 1,1).
+- `exato_a` / `exato_b`: a borda não anda para a pausa (use quando você mediu a pausa no volume: fala corrida com
+  respiro curto entre frases, que o motor não reconhece como pausa). Meça antes; borda em cima de fala come sílaba.
 - `skip`: pedaços de TEMPO que saem de dentro do trecho (tropeço, repetição, hesitação escondida em palavra `esticada` no `leitura.md`).
 - Palavra esticada por cima de hesitação engana o `skip` (a palavra certa some junto). Retranscreva só o trecho
   (`ffmpeg -ss A -to B -i bruto trecho.wav` + `motor/transcrever.py`), corrija o tempo dela em
@@ -150,6 +156,10 @@ fica até o último quadro, sozinha.
 - `lista` com `"destaque": "fala"` acende o item dito, um a cada `passo` segundos.
 - `citacao`: `origem` padrão `x`; página de site: `"origem": "blog.google"` + `logo`. `fica_ate`: o card recua e
   fica atrás do próximo até essa palavra.
+- **Efeitos prontos** (`print`, `tela_assunto`, `checklist`, `holofote`, `comentario`, `contador`, `hodometro`, `caixa`,
+  `traco`, `cinetica`, `antes_depois`, `timeline_chamas`) e a cena `som`: JSON e regras em `efeitos-prontos.md`.
+  Qualquer cena aceita `"som"` (troca o efeito sonoro dela; `"nenhum"` = silêncio) e `"som_ganho"`.
+- `lista`: item pode ter âncora própria (`{ "texto": "Zoom", "quando": "zoom" }`) e acende na palavra.
 - `timeline_chamas` (efeito nativo da Nomics, o mesmo do editor da casa): uma timeline de edição (faixas, régua,
   agulha, timecode) se desdobra em 3D acima da cabeça, monta clipe a clipe e pega fogo na palavra `queima_em`: brasa,
   fagulhas, fumaça e a luz do fogo na sala, com som de whoosh, riser e impacto. `{ "tipo": "timeline_chamas",

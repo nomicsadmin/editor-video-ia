@@ -1,6 +1,8 @@
 # Efeitos extras (opcional)
 
-As telas prontas do motor cobrem a maior parte dos vídeos. Quando a pessoa pede algo que elas não fazem
+Antes daqui: os efeitos prontos (`efeitos-prontos.md`) já fazem print vivo em 3D, tela do assunto, checklist, holofote,
+comentário, número que conta, hodômetro, caixa, logo no traço, texto cinético, antes e depois e timeline em chamas.
+As telas e os efeitos prontos cobrem a maior parte dos vídeos. Quando a pessoa pede algo que elas não fazem
 (transição de vidro quebrando, gráfico subindo animado, texto com efeito especial), há dois caminhos.
 
 ## 1 · Cena sob medida (extra.js)

@@ -9,8 +9,9 @@ Na ordem. Se você usa a IA (recomendado), ela segue estes guias por você; eles
 | 03 | [Gravar melhor](03-gravar.md) | 6 cuidados que deixam a edição muito melhor |
 | 04 | [Primeira edição](04-primeira-edicao.md) | o que mandar e o que a IA vai perguntar |
 | 05 | [Receitas](05-receitas.md) | os 5 estilos de edição e quando usar |
-| 06 | [Referências](06-referencias.md) | como a IA lê o vídeo que você ama |
-| 07 | [Efeitos extras](07-efeitos-extras.md) | quando pedir algo que as telas prontas não fazem |
+| 06 | [Referências](06-referencias.md) | como a IA lê o vídeo que você ama e salva um estilo com nome |
+| 07 | [Efeitos extras](07-efeitos-extras.md) | quando pedir algo que nem os efeitos prontos fazem |
 | 08 | [Sua marca](08-sua-marca.md) | cores, fontes e logo |
 | 09 | [Problemas comuns](09-problemas-comuns.md) | o que fazer quando trava |
+| 10 | [Efeitos prontos](10-efeitos-prontos.md) | os efeitos do editor da Nomics e a frase que pede cada um |
 | · | [Glossário](glossario.md) | as palavras técnicas em uma frase |

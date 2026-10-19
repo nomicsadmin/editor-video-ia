@@ -1,6 +1,6 @@
 ---
 name: editor-de-video
-description: Editor de vídeo dentro do Claude Code. Recebe o vídeo bruto (reels falado, 9:16 ou 16:9), o briefing e uma referência, e devolve o .mp4 editado com corte pela fala, legenda palavra a palavra, telas que entram na palavra certa, som nivelado para o Instagram e conferência antes de mostrar. Use quando o pedido for "edita esse vídeo", "edita meu reels", "corta esse vídeo", "faz a legenda", "quero que fique igual a essa referência", "/editor-de-video <vídeo>". Também ajusta uma edição já feita ("muda a legenda", "tira esse pedaço").
+description: Editor de vídeo dentro do Claude Code. Recebe o vídeo bruto (reels falado, 9:16 ou 16:9), o briefing e uma referência, e devolve o .mp4 editado com corte pela fala, legenda palavra a palavra que sobe, telas e efeitos prontos (print vivo em 3D, tela do assunto, checklist, holofote, comentário, número que conta, hodômetro, caixa, logo no traço, texto cinético, antes e depois, timeline em chamas) que entram na palavra certa, som desenhado e conferência antes de mostrar. Aprende o estilo de 1 a 6 referências e guarda com nome ("edita no estilo X"). Use quando o pedido for "edita esse vídeo", "edita meu reels", "corta esse vídeo", "faz a legenda", "quero que fique igual a essa referência", "salva esse estilo", "edita no estilo <nome>", "o número conta quando eu falar X", "/editor-de-video <vídeo>". Também ajusta uma edição já feita ("muda a legenda", "tira esse pedaço").
 ---
 
 # Editor de vídeo
@@ -14,8 +14,10 @@ recomendada em primeiro. Nunca mostre comando, caminho de arquivo ou JSON se ela
 Leia antes de editar (todos nesta pasta):
 1. `referencias/receitas.md` · os estilos de edição e quando usar cada um
 2. `referencias/formato.md` · os arquivos do projeto (projeto.json, edl.json, cenas.json)
-3. `referencias/referencia.md` · como ler a referência que a pessoa mandou
-4. Sob demanda: `referencias/efeitos-extras.md` (efeito que as telas prontas não fazem)
+3. `referencias/referencia.md` · como ler a referência que a pessoa mandou e salvar um estilo com nome
+4. `referencias/efeitos-prontos.md` · os efeitos prontos (print vivo, tela do assunto, checklist, holofote, comentário,
+   contador, hodômetro, caixa, traço, cinético, antes e depois, timeline em chamas): quando usar e o JSON
+5. Sob demanda: `referencias/efeitos-extras.md` (efeito que nem as telas nem os efeitos prontos fazem)
 
 Tudo roda na pasta do projeto (a raiz deste repositório). `$PY` = o Python do projeto: `.venv/bin/python` no Mac,
 `.venv/Scripts/python.exe` no Windows (Git Bash). `base.py`, `render.mjs` inteiro e `montar.sh` podem levar
@@ -43,6 +45,10 @@ se faltar algo, `bash scripts/setup.sh` (explique em uma frase o que ele instala
 9. **Nada sai do computador.** Transcrição e render são locais. Nunca mande o vídeo para serviço externo
    sem a pessoa pedir. Nunca publique.
 10. **Privacidade:** nome de cliente ou de terceiro que não autorizou = bip (`"bips"` no edl.json) se ela pedir.
+11. **Som desenhado, sem música por padrão.** Os efeitos sonoros já vêm com cada tela e efeito (whoosh na troca, clique
+    no cursor, pop no número), sempre abaixo da voz. Música só se a pessoa pedir e mandar o arquivo (`edicao.trilha`).
+12. **Efeito grande no máximo a cada ~6 s**, e só onde a frase pede (`referencias/efeitos-prontos.md`). No Windows,
+    os efeitos que recortam a pessoa saem por cima: diga isso no plano se ela estiver no Windows.
 
 ---
 
@@ -69,6 +75,13 @@ e olhe a folha. Conte para a pessoa, em 3 a 5 linhas: duração, ritmo da fala, 
 dá para tirar, e se o áudio tem ruído.
 
 ### 4 · Ler a referência (se houver)
+**Estilo salvo:** se ela disse "no estilo <nome>", rode `$PY motor/referencia.py --aplicar <nome> edicoes/<pasta>` (leva o
+estilo para o `projeto.json` e devolve as metas: receita, pausa máxima, tela nova a cada X s, % de tela dividida,
+efeitos por minuto, som) e leia `minhas-referencias/estilos/<nome>.md`. Use as metas no plano; não precisa de referência
+nova. Não sabe o nome? `$PY motor/referencia.py --lista`.
+**Salvar um estilo** ("aprende esse estilo", "salva como <nome>"): `$PY motor/referencia.py <ref1> ... <ref6> --estilo <nome>`,
+depois olhe as folhas e preencha o "visto" (detalhe em `referencias/referencia.md`).
+**Referência solta:**
 `$PY motor/referencia.py <arquivo-ou-link> edicoes/<pasta>/referencia`
 Link do Instagram, TikTok ou YouTube baixa sozinho (se o site pedir login, o script usa o login do navegador da
 pessoa neste computador; não pergunte nem explique, a não ser que falhe). Olhe `folha.jpg` e `cortes.jpg`. Monte a ficha em linguagem simples (como em `referencia.md`) e escolha a receita
@@ -76,7 +89,8 @@ mais próxima. Copie o **jeito** (ritmo, legenda, layout, cor), nunca a marca, o
 Sem referência: mostre as receitas de `receitas.md` (uma frase cada) e recomende uma, com o porquê.
 
 ### 5 · Plano (espere o "pode")
-4 a 8 frases: receita, duração-alvo, o que sai, as telas principais na ordem da fala, legenda, música.
+4 a 8 frases: receita (ou o estilo salvo), duração-alvo, o que sai, as telas e os efeitos prontos na ordem da fala
+(com a palavra de cada um), legenda, som (desenhado; música só se ela pediu).
 Termine com uma pergunta só. **Não corte antes do ok.**
 
 ### 6 · Cortar
@@ -87,7 +101,8 @@ Confira só o áudio (10 s): `$PY motor/checar_voz.py edicoes/<pasta>`. Sumiu pa
 Erro de transcrição que vai se repetir (nome do produto dela): `motor/glossario.json`. Só deste vídeo: `fix` no edl.
 
 ### 7 · Telas
-Escreva `cenas.json`. Antes do render inteiro, confira quadros soltos e **olhe as imagens**:
+Escreva `cenas.json` (telas em `formato.md`, efeitos prontos em `efeitos-prontos.md`). Print com trecho marcado: ache a
+área com `$PY motor/achar_texto.py <print> "trecho"`. Antes do render inteiro, confira quadros soltos e **olhe as imagens**:
 `node motor/render.mjs edicoes/<pasta> --frames 30,240,600 --out edicoes/<pasta>/_build/q`
 `node motor/render.mjs edicoes/<pasta> --qa` lista âncora não achada, cena encostando na legenda, tela sobreposta.
 

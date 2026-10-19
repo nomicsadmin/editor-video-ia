@@ -1,12 +1,12 @@
 # Como funciona
 
-1. **Lê a fala.** O transcritor escuta o vídeo no seu Mac e anota cada palavra com o segundo exato em que você disse.
-2. **Lê a referência.** Se você mandou, mede de quanto em quanto tempo ela corta, onde fica o rosto, como é a legenda.
+1. **Lê a fala.** O transcritor escuta o vídeo no seu computador e anota cada palavra com o segundo exato em que você disse.
+2. **Lê a referência.** Se você mandou, mede de quanto em quanto tempo ela corta, onde fica o rosto, como é a legenda. De 1 a 6 referências viram um estilo salvo com nome.
 3. **Plano.** A IA te diz em poucas frases o que vai tirar e o que vai entrar na tela. Só segue com o seu "pode".
 4. **Corte.** Tira pausa, tropeço e repetição. A borda do corte cai no silêncio de verdade do áudio, então nenhuma palavra fica pela metade.
-5. **Telas.** Cada print, número, card ou logo entra na palavra em que você fala dele.
+5. **Telas e efeitos.** Cada print, número, card ou logo entra na palavra em que você fala dele, e os efeitos prontos (print vivo em 3D, checklist, holofote, número que conta...) também.
 6. **Render.** O vídeo é desenhado quadro a quadro no seu computador (1080×1920, 30 quadros por segundo).
-7. **Som.** Voz limpa e nivelada, efeitos discretos nas entradas, volume no padrão das redes (-14 LUFS).
+7. **Som.** Voz limpa e nivelada, som desenhado nas trocas (whoosh, clique, pop), sem música a não ser que você peça, volume no padrão das redes (-14 LUFS).
 8. **Conferência.** A IA reouve o vídeo final e compara com a sua fala. Se alguma palavra sumiu, corrige antes de te mostrar.
 9. **Ajustes.** Você pede com as suas palavras e ela mexe só no que você pediu.
 

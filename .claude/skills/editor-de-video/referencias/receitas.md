@@ -59,5 +59,9 @@ Os números são faixas, não regra fixa: a referência da pessoa manda mais que
 - Ritmo médio de fala: 2,8 a 3,2 palavras por segundo depois do corte. Chega lá cortando pausa, não acelerando a voz
   (acelerar só se a pessoa pedir).
 - Duração: o que o conteúdo pede. Corte repetição, não ideia.
-- Som: voz limpa e nivelada antes de qualquer efeito. Efeito sonoro só na entrada de elemento, baixinho.
-- Música (se ela mandar): entra baixa e abaixa sozinha quando ela fala (`edicao.trilha`).
+- Som desenhado: voz limpa e nivelada antes de tudo; efeito sonoro na entrada de elemento (whoosh na troca de tela,
+  clique no cursor, pop no número, riser antes da virada), sempre abaixo da voz. Já vem com cada tela e efeito pronto.
+- Sem música por padrão. Música só se ela pedir e mandar o arquivo: entra baixa e abaixa sozinha quando ela fala
+  (`edicao.trilha`).
+- Legenda palavra a palavra entra subindo de leve, branca; ênfase só no tamanho, em 3 a 5 palavras.
+- Efeito pronto grande a cada ~6 s no máximo (`efeitos-prontos.md`). Tela dividida com print: prefira o print vivo.

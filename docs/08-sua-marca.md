@@ -7,6 +7,9 @@ Uma vez só, vale para todos os vídeos. A IA monta com você.
 - **Fontes:** título, texto e legenda, em arquivo `.woff2`. Só fonte livre (Google Fonts, por exemplo) ou comprada por
   você. Sem certeza da licença? Fique com a neutra.
 - **Logo:** PNG com fundo transparente.
+- **Foto de perfil** (opcional): a mesma do seu Instagram, em JPG. Aparece na resposta do efeito de comentário
+  ("comenta X que eu te mando"). Sem foto, entram as suas iniciais.
 
 Os arquivos ficam em `minha-marca/` (nunca vão para o GitHub). Formato do `marca.json`: veja `minha-marca/marca.exemplo.json`.
 Sem marca, o editor usa um visual neutro: Fraunces nos títulos, Manrope no texto e na legenda, laranja de destaque.
+Os efeitos prontos usam a sua cor de destaque e, se você tiver fontes, as suas fontes de título e de texto.

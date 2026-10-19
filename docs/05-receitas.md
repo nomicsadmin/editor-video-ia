@@ -59,5 +59,17 @@ Os números são faixas, não regra fixa: a referência da pessoa manda mais que
 - Ritmo médio de fala: 2,8 a 3,2 palavras por segundo depois do corte. Chega lá cortando pausa, não acelerando a voz
   (acelerar só se a pessoa pedir).
 - Duração: o que o conteúdo pede. Corte repetição, não ideia.
-- Som: voz limpa e nivelada antes de qualquer efeito. Efeito sonoro só na entrada de elemento, baixinho.
-- Música (se ela mandar): entra baixa e abaixa sozinha quando ela fala (`edicao.trilha`).
+- Som desenhado: whoosh na troca de tela, clique no cursor, pop no número, riser antes da virada, sempre abaixo da voz.
+- Sem música por padrão. Quer música? Peça e mande o arquivo: ela entra baixa e abaixa sozinha quando você fala.
+- Legenda que sobe: cada palavra entra subindo de leve, branca; as palavras de ênfase só ficam maiores.
+- Efeitos prontos (print vivo, checklist, holofote, número que conta...): um a cada ~6 s, no máximo. Lista e frase
+  de cada um em [Efeitos prontos](10-efeitos-prontos.md).
+
+## Que efeito combina com cada receita
+| Receita | Efeitos que combinam |
+|---|---|
+| Rosto e ideia | tela do assunto no gancho, holofote na virada, contador ou hodômetro no número, comentário no CTA, texto cinético no fecho |
+| Tela dividida | print vivo (um por assunto, com marca-texto e caixa), logo no traço, lista que acende, selo |
+| Motion de produto | contador, caixa, lista que acende, texto cinético, antes e depois |
+| Conversa crua | quase nada: um selo ou o comentário no fim |
+| Bastidor de tela | caixa no trecho da gravação, checklist das etapas, timeline em chamas se for sobre edição |

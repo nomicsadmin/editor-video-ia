@@ -3,13 +3,13 @@
 # Seu editor de vídeo dentro do Claude.
 ### Manda o vídeo, o briefing e a referência. Recebe o reels editado.
 
-Corte pela fala, legenda palavra a palavra, telas que entram na palavra certa e som pronto pro Instagram.<br>
+Corte pela fala, legenda palavra a palavra, os efeitos do editor da Nomics na palavra certa e som desenhado.<br>
 **Tudo no seu computador, Mac ou Windows. Sem pagar por minuto. Sem saber editar.**
 
 
 <img alt="O mesmo trecho: à esquerda o vídeo bruto do celular, à direita editado pela skill" src="docs/img/antes-depois.gif" width="600">
 
-[**Começar com IA (sem saber editar)**](#-comece-em-3-passos-com-a-ia) · [**Passo a passo completo**](docs/README.md) · [**Ver as receitas**](#-as-receitas)
+[**Começar com IA (sem saber editar)**](#-comece-em-3-passos-com-a-ia) · [**Ver os efeitos**](#-efeitos-prontos) · [**Passo a passo completo**](docs/README.md) · [**Ver as receitas**](#-as-receitas)
 
 <sub>Open-source AI video editor for Claude Code · cuts on speech, word-by-word captions, scenes anchored to what you say · runs locally on macOS and Windows</sub>
 
@@ -23,15 +23,16 @@ Corte pela fala, legenda palavra a palavra, telas que entram na palavra certa e 
 
 | | | |
 |---|---|---|
-| ✂️ **Corte que não come palavra**<br>Pausa, tropeço e repetição saem. O corte só cai em pausa de verdade, medida no áudio. | 💬 **Legenda palavra a palavra**<br>No tempo exato da fala, abaixo do queixo, longe da interface do Instagram. | 🎯 **Telas na palavra certa**<br>Print, número, card e logo entram quando você diz, não num segundo chutado. |
-| 📱 **Tela dividida com rosto grande**<br>O assunto em cima, você embaixo, sem ficar minúsculo no celular. | 🔊 **Som pronto pro Instagram**<br>Voz limpa e nivelada, efeito discreto nas entradas, volume no padrão das redes. | 🔍 **Conferência antes de te mostrar**<br>A IA reouve o vídeo final e corrige sílaba comida e tela vazia. |
-| 🎬 **Copia o jeito da sua referência**<br>Manda o link: ela mede o ritmo, a legenda e o layout e segue. | 🔁 **Ajuste em português**<br>"Legenda mais pra cima", "tira esse pedaço". Mexe só no que você pediu. | 🔒 **Nada sai do seu computador**<br>Transcrição e render rodam na sua máquina. Sem chave de API. |
+| ✂️ **Corte que não come palavra**<br>Pausa, tropeço e repetição saem. O corte só cai em pausa de verdade, medida no áudio. | 💬 **Legenda que sobe, palavra a palavra**<br>No tempo exato da fala, branca, cada palavra subindo de leve, abaixo do queixo. | 🎯 **Telas na palavra certa**<br>Print, número, card e logo entram quando você diz, não num segundo chutado. |
+| 🖥️ **Print vivo em 3D**<br>O print entra numa janela com sombra, rola, o cursor clica e o marca-texto se desenha na palavra. | ✨ **14 efeitos do editor da Nomics**<br>Checklist na parede, holofote, comentário, número que conta, antes e depois e mais. | 🔊 **Som desenhado, sem música**<br>Whoosh na troca, clique no cursor, pop no número. Música só se você pedir. |
+| 🎬 **Estilo salvo das suas referências**<br>Manda de 1 a 6 vídeos: ela mede o ritmo, a tela, a legenda e o som e guarda com nome. | 📱 **Tela dividida com rosto grande**<br>O assunto em cima, você embaixo, sem ficar minúsculo no celular. | 🔍 **Conferência antes de te mostrar**<br>A IA reouve o vídeo final e corrige sílaba comida e tela vazia. |
+| 🔁 **Ajuste em português**<br>"Legenda mais pra cima", "tira esse pedaço". Mexe só no que você pediu. | 💻 **Mac e Windows**<br>Tudo roda nos dois. No Mac, alguns efeitos ainda recortam você na frente do fundo. | 🔒 **Nada sai do seu computador**<br>Transcrição e render rodam na sua máquina. Sem chave de API, sem pagar por efeito. |
 
 ## 🔁 Você só manda 3 coisas
 
 | 🎥 Seu vídeo | 📝 Seu briefing | 🎯 Sua referência |
 |---|---|---|
-| O bruto do celular, do jeito que gravou. Pode ser em partes. | Do jeito que sair: sobre o que é, pra que serve, o que não pode aparecer. | Um link de reels que você queria que o seu parecesse. Ou um print. Ou nada. |
+| O bruto do celular, do jeito que gravou. Pode ser em partes. | Do jeito que sair: sobre o que é, pra que serve, o que não pode aparecer. | Um link de reels que você queria que o seu parecesse. Ou de 1 a 6 para salvar um estilo. Ou nada. |
 | [Como gravar melhor →](docs/03-gravar.md) | [O que contar →](docs/04-primeira-edicao.md) | [Como ela lê a referência →](docs/06-referencias.md) |
 
 ---
@@ -58,6 +59,30 @@ Referência: [link de um reels que você gosta]
 Pronto. Ela lê a fala, lê a referência, te mostra o plano e entrega o vídeo editado.
 
 > 💡 Quanto custa? O editor é grátis. Você só usa o seu plano do Claude. [Veja o que precisa](docs/02-pre-requisitos.md).
+
+---
+
+## ✨ Efeitos prontos
+
+Os mesmos efeitos que a Nomics usa nos próprios reels. Você pede em português e diz em que palavra entra:
+
+<img alt="Vitrine dos efeitos prontos, feita com este editor: print vivo em 3D, checklist, holofote, número que conta, comentário e mais" src="docs/img/efeitos.gif" width="300">
+
+<sub>Vitrine feita com este editor, do bruto ao vídeo, sem nada de fora. Aqui acelerada 1,5×; [com som e no tempo real](docs/img/efeitos.mp4).</sub>
+
+| Peça assim | Entra |
+|---|---|
+| "Mostra o print da página e marca o trecho *X* quando eu falar *Y*." | **Print vivo**: janela em 3D com sombra, a página rola, o cursor clica e o marca-texto (ou uma caixa) se desenha |
+| "No começo, a tela do site desce e eu vou para baixo." | **Tela do assunto** no gancho |
+| "Faz um checklist na parede: *A*, *B*, *C*, cada um quando eu falar." | **Checklist 3D** de metal atrás de você |
+| "Nessa frase, apaga a luz e escreve atrás de mim." | **Holofote** |
+| "O número conta quando eu falar *377*." · "Um hodômetro gira até *437*." | **Contador** · **hodômetro** |
+| "No *comenta IA*, mostra o comentário sendo digitado e a minha resposta." | **Comentário** com a sua foto |
+| "Desenha o logo do Claude quando eu falar dele." · "Escreve *Comenta IA* grande no final." | **Logo no traço** · **texto cinético** |
+| "Mostra o antes e depois da edição." · "A timeline pega fogo quando eu falar *tela*." | **Antes e depois** · **timeline em chamas** |
+
+E mais: caixa que se desenha, selo, lista que acende item a item. Quando usar cada um e a frase exata:
+[Efeitos prontos →](docs/10-efeitos-prontos.md)
 
 ---
 
@@ -107,7 +132,7 @@ O diagnóstico (`bash scripts/diagnostico.sh`) confere tudo e diz o que falta, s
 
 ## ✋ O que ele não faz (ainda)
 
-Não publica nada por você. Não inventa número, print nem depoimento: se não está na sua fala ou na sua pasta, não entra. Efeito pronto: a timeline em chamas, o mesmo efeito do editor da Nomics ("a timeline pega fogo quando eu falar X"). Efeito especial fora das telas prontas: a IA monta sob medida ou usa o catálogo aberto do [HyperFrames](https://github.com/heygen-com/hyperframes), [quando você pedir](docs/07-efeitos-extras.md).
+Não publica nada por você. Não inventa número, print nem depoimento: se não está na sua fala ou na sua pasta, não entra. Não grava a sua tela nem tira o print sozinho: você manda o print (página inteira serve). Não coloca música sem você pedir. No Windows, os efeitos que põem você na frente do fundo (tela do assunto, checklist, holofote, hodômetro, timeline em chamas) saem por cima, porque o recorte da pessoa usa o Vision da Apple. Efeito especial fora dos [14 prontos](docs/10-efeitos-prontos.md): a IA monta sob medida ou usa o catálogo aberto do [HyperFrames](https://github.com/heygen-com/hyperframes), [quando você pedir](docs/07-efeitos-extras.md).
 
 ---
 
@@ -119,4 +144,4 @@ Este repositório é a versão aberta desse editor, feita para a galera do **Nex
 
 Feito pelo [**Grupo Nomics**](https://gruponomics.com.br). Licença [MIT](LICENSE): use, adapte e compartilhe, mantendo o crédito.
 
-<sub>Créditos: fontes Fraunces, Manrope e JetBrains Mono (SIL Open Font License) · logos de marcas de IA do pacote <a href="https://github.com/lobehub/lobe-icons">Lobe Icons</a> (MIT; as marcas pertencem aos donos) · transcrição com <a href="https://github.com/ml-explore/mlx-examples">MLX Whisper</a> e <a href="https://github.com/SYSTRAN/faster-whisper">faster-whisper</a> · render com <a href="https://playwright.dev">Playwright</a> e <a href="https://ffmpeg.org">ffmpeg</a>.</sub>
+<sub>Créditos: fontes Fraunces, Manrope, JetBrains Mono, Instrument Serif e Hedvig Letters (SIL Open Font License) · animação com <a href="https://gsap.com">GSAP</a> (licença padrão gratuita) · sons sintetizados no próprio editor · logos de marcas de IA do pacote <a href="https://github.com/lobehub/lobe-icons">Lobe Icons</a> (MIT; as marcas pertencem aos donos) · transcrição com <a href="https://github.com/ml-explore/mlx-examples">MLX Whisper</a> e <a href="https://github.com/SYSTRAN/faster-whisper">faster-whisper</a> · render com <a href="https://playwright.dev">Playwright</a> e <a href="https://ffmpeg.org">ffmpeg</a>.</sub>
