@@ -74,7 +74,9 @@ def rosto(arq, dur):
     # Mac: Vision da Apple (mais preciso). Windows, ou Mac sem as ferramentas da Apple: OpenCV (rosto.py).
     aqui = os.path.dirname(os.path.abspath(__file__))
     binario = os.path.join(aqui, "_bin", "rosto")
-    if sys.platform == "darwin" and not os.path.exists(binario) and shutil.which("swiftc"):
+    fonte = os.path.join(aqui, "rosto.swift")
+    velho = not os.path.exists(binario) or os.path.getmtime(binario) < os.path.getmtime(fonte)
+    if sys.platform == "darwin" and velho and shutil.which("swiftc"):
         os.makedirs(os.path.dirname(binario), exist_ok=True)
         subprocess.run(["swiftc", "-O", os.path.join(aqui, "rosto.swift"), "-o", binario], capture_output=True)
     comando = [binario] if os.path.exists(binario) else [sys.executable, os.path.join(aqui, "rosto.py")]

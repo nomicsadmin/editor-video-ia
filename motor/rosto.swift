@@ -8,17 +8,19 @@ import Vision
 let dir = URL(fileURLWithPath: CommandLine.arguments[1])
 let files = (try? FileManager.default.contentsOfDirectory(atPath: dir.path))?.filter { $0.hasSuffix(".jpg") }.sorted() ?? []
 var caixas: [[Double]] = []
+var porQuadro: [Any] = []   // a caixa de cada quadro, na ordem dos arquivos (NSNull = sem rosto): a referência mede o tempo com rosto
 for f in files {
   let req = VNDetectFaceRectanglesRequest()
   let h = VNImageRequestHandler(url: dir.appendingPathComponent(f), options: [:])
   try? h.perform([req])
-  guard let faces = req.results, !faces.isEmpty else { continue }
+  guard let faces = req.results, !faces.isEmpty else { porQuadro.append(NSNull()); continue }
   let r = faces.max(by: { $0.boundingBox.width * $0.boundingBox.height < $1.boundingBox.width * $1.boundingBox.height })!.boundingBox
   // Vision tem origem embaixo; convertemos para origem no topo
   caixas.append([Double(r.minX), Double(1 - r.maxY), Double(r.maxX), Double(1 - r.minY)])
+  porQuadro.append(caixas.last!)
 }
 func med(_ i: Int) -> Double { let v = caixas.map { $0[i] }.sorted(); return v.isEmpty ? -1 : v[v.count / 2] }
 let out: [String: Any] = ["quadros": files.count, "com_rosto": caixas.count,
-  "mediana": ["x0": med(0), "y0": med(1), "x1": med(2), "y1": med(3)], "caixas": caixas]
+  "mediana": ["x0": med(0), "y0": med(1), "x1": med(2), "y1": med(3)], "caixas": caixas, "por_quadro": porQuadro]
 let data = try JSONSerialization.data(withJSONObject: out, options: [.sortedKeys])
 print(String(data: data, encoding: .utf8)!)

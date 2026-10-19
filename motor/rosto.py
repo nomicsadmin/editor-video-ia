@@ -14,10 +14,11 @@ import cv2
 pasta = sys.argv[1]
 det = cv2.CascadeClassifier(os.path.join(cv2.data.haarcascades, "haarcascade_frontalface_default.xml"))
 arqs = sorted(f for f in os.listdir(pasta) if f.endswith(".jpg"))
-caixas = []
+caixas, por_quadro = [], []   # por_quadro: a caixa de cada quadro, na ordem (None = sem rosto)
 for f in arqs:
     im = cv2.imread(os.path.join(pasta, f))
     if im is None:
+        por_quadro.append(None)
         continue
     h, w = im.shape[:2]
     rs = det.detectMultiScale(cv2.cvtColor(im, cv2.COLOR_BGR2GRAY), scaleFactor=1.1, minNeighbors=6, minSize=(w // 8, w // 8))
@@ -25,6 +26,10 @@ for f in arqs:
         x, y, bw, bh = max(rs, key=lambda r: r[2] * r[3])
         # calibrado contra o Vision da Apple no mesmo vídeo (07/Out/2026): queixo a menos de 1% de diferença
         caixas.append([x / w, y / h, (x + bw) / w, min(1.0, (y + bh * 1.03) / h)])
+        por_quadro.append(caixas[-1])
+    else:
+        por_quadro.append(None)
 med = lambda i: sorted(c[i] for c in caixas)[len(caixas) // 2] if caixas else -1
 print(json.dumps({"quadros": len(arqs), "com_rosto": len(caixas),
-                  "mediana": {"x0": med(0), "y0": med(1), "x1": med(2), "y1": med(3)}, "caixas": caixas}))
+                  "mediana": {"x0": med(0), "y0": med(1), "x1": med(2), "y1": med(3)}, "caixas": caixas,
+                  "por_quadro": por_quadro}))
