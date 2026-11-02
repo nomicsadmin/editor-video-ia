@@ -94,6 +94,16 @@ async function img(src) {
   const r = await fetch(src); if (!r.ok) { avisos.push('imagem não achada: ' + src); IMG.set(src, null); return null; }
   const b = await createImageBitmap(await r.blob()); IMG.set(src, b); return b;
 }
+// quadro solto de uma sequência (filmagem real recortada, fogo de verdade...): não fica guardado para sempre como o img(),
+// só os últimos 12, para uma sequência longa não encher a memória do navegador
+const SEQ = new Map();
+async function quadroSeq(src) {
+  if (SEQ.has(src)) { const b = SEQ.get(src); SEQ.delete(src); SEQ.set(src, b); return b; }
+  const r = await fetch(src); if (!r.ok) { SEQ.set(src, null); return null; }
+  const b = await createImageBitmap(await r.blob()); SEQ.set(src, b);
+  while (SEQ.size > 12) { const [k, v] = SEQ.entries().next().value; SEQ.delete(k); if (v) v.close(); }
+  return b;
+}
 async function logo(nome, cor = '#111111') {
   const k = `logo:${nome}:${cor}`; if (IMG.has(k)) return IMG.get(k);
   const r = await fetch(`/logos/${nome}.svg`); if (!r.ok) { avisos.push('logo não achado: ' + nome); IMG.set(k, null); return null; }
@@ -496,7 +506,7 @@ function legenda(t, lay) {
 
 // ---------------------------------------------------------------- cena sob medida do projeto (extra.js)
 let EXTRA = {};
-try { if (window.__temExtra) { const m = await import('/p/extra.js'); EXTRA = (m.default || (() => ({})))({ x, W, H, C, F, PESO, TL, words, ancora, seg, eOut, eBack, eInOut, clamp, rr, img, logo, titulo, rotulo, DESENHA }) || {}; for (const c of CENAS) if (EXTRA.preparar) await EXTRA.preparar(c); } } catch (e) { avisos.push('extra.js falhou: ' + e.message); }
+try { if (window.__temExtra) { const m = await import('/p/extra.js'); EXTRA = (m.default || (() => ({})))({ x, W, H, C, F, PESO, TL, words, ancora, seg, eOut, eBack, eInOut, clamp, rr, img, logo, titulo, rotulo, DESENHA, quadroSeq, FPS }) || {}; for (const c of CENAS) if (EXTRA.preparar) await EXTRA.preparar(c); } } catch (e) { avisos.push('extra.js falhou: ' + e.message); }
 
 // ---------------------------------------------------------------- acabamento "cru": grão de filme, vinheta e tom levemente quente
 const GRAO = [];
@@ -559,13 +569,13 @@ async function desenha(n) {
   VID = null; const lay = await fundoELayout(t, s);
   if (ED.acabamento === 'cru') cru(n);
   await EF.camadas(t);
-  if (EXTRA.fundo) EXTRA.fundo(t, s, lay);
+  if (EXTRA.fundo) await EXTRA.fundo(t, s, lay);   // os ganchos do extra.js podem ser async (carregar um quadro de sequência)
   for (const c of CENAS) {
     if (t < c.t0 - 0.01 || t > (c.t2 != null ? c.t2 + 0.3 : c.t1) + 0.01) continue;
-    if (EXTRA.cena && EXTRA.cena(c, t, s) === true) continue;
+    if (EXTRA.cena && (await EXTRA.cena(c, t, s)) === true) continue;
     const f = DESENHA[c.tipo]; if (f) { x.save(); f(c, t, s); x.restore(); }
   }
-  if (EXTRA.frente) EXTRA.frente(t, s, lay);
+  if (EXTRA.frente) await EXTRA.frente(t, s, lay);
   legenda(t, lay);
 }
 
